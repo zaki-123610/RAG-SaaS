@@ -1,0 +1,15 @@
+# Core
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+
+# RAG
+langchain
+openai
+chromadb
+tiktoken
+
+# Eval / utils
+pytest
+pandas
