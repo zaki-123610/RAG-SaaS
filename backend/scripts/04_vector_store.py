@@ -2,19 +2,37 @@ import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+import re
 
 # --- reprise du script 03 : PDF -> chunks ---
-reader = PdfReader("data/test.pdf")
+reader = PdfReader("data/test2.pdf")
 texte = ""
 for page in reader.pages:
     texte += page.extract_text()
 
+def nettoyer(texte):
+    texte = re.sub(r"[\U0001D400-\U0001D7FF]", " ", texte)   
+    texte = re.sub(r"[∑∏√≠≤≥±∞⇒→➔➢−]", " ", texte)
+    texte = re.sub(r"\s+", " ", texte)
+    return texte.strip()
+
+texte = nettoyer(texte)   
+
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=100,
+    chunk_size=500, chunk_overlap=100,
     separators=["\n\n", "\n", ". ", " ", ""],
 )
-chunks = splitter.split_text(texte)
+chunks = splitter.split_text(texte)      # ← chunks naît ici
+
+
+def est_lisible(chunk):                   # ← puis la fonction
+    lettres = sum(c.isalpha() and c.isascii() for c in chunk)
+    return lettres / max(len(chunk), 1) > 0.5
+
+
+chunks = [c for c in chunks if est_lisible(c)]   # ← puis le filtre
+
+print("chunks apres filtre :", len(chunks))
 
 # --- nouveau : stockage dans ChromaDB ---
 embedding_fn = SentenceTransformerEmbeddingFunction(

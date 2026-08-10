@@ -1,7 +1,7 @@
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-reader = PdfReader("data/test.pdf")
+reader = PdfReader("data/test2.pdf")
 
 texte = ""
 for page in reader.pages:

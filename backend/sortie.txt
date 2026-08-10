@@ -1,0 +1,719 @@
+caracteres : 14817
+chunks     : 37
+
+--- chunk 0 | 469 car ---
+1
+Chapter V Random signal modeling
+I. Introduction
+➔ Modeling = Representing a real phenomenon with a simplified model that describes its behavior.
+➢ Real phenomenon: voice, communication channel, temperature, stock market…
+➢ Model: equation, diagram, simulation, digital filter…
+➢ Goal: to understand, predict, filter, control, or simulate.
+II. Definition
+➔ Describe the statistical behavior of the process : Mean, Variance, Autocorrelation, Power Spectral Density, or
+
+--- chunk 1 | 488 car ---
+parametric models such as AR/MA/ARMA
+➔ In order to understand, analyze, predict, or filter this signal in real systems.
+➔ Random signal modelling consists of representing a signal 𝑥(𝑡) or 𝑥[𝑛] as a realisation of a random process. These 
+signals can be stationary or non-stationary.
+Example1
+A random signal is often modeled as a combination of deterministic and random components.
+𝒙 𝒕 = 𝒅 𝒕 + 𝒘 𝒕Example2  
+In telecommunications, Radio channel: the received signal 𝑦 𝑛  is influenced by:
+
+--- chunk 2 | 418 car ---
+In telecommunications, Radio channel: the received signal 𝑦 𝑛  is influenced by:
+➢ multipath propagation
+➢ attenuation
+➢ noise
+We can model this channel as:
+𝑦 𝑛 = ℎ 𝑛 ∗ 𝑥 𝑛 + 𝑤 𝑛
+➢ 𝑥 𝑛  : transmitted signal
+➢ ℎ 𝑛  : impulse response of the channel (the channel model)
+➢ 𝑤 𝑛  : noise
+Here, modeling consists in finding an ℎ 𝑛  that behaves like the real channel.III. Modeling objectives
+1. Statistical characterisation:
+
+--- chunk 3 | 447 car ---
+1. Statistical characterisation:
+➔Determine key parameters : mean, variance, autocorrelation and power spectral density of the signal. 
+2. Spectral analysis:
+➔Understand how the signal’s energy or components are distributed across frequencies.
+3. Prediction:
+➔Use mathematical models to predict future values of the signal.
+4. Filtering and noise reduction:
+➔Remove unwanted noise or disturbances while preserving useful information.
+5. Synthesis:
+
+--- chunk 4 | 489 car ---
+➔Remove unwanted noise or disturbances while preserving useful information.
+5. Synthesis:
+➔ Generate synthetic signals that reproduce the statistical properties of real observed data.
+34
+IV. Applications
+1. Telecommunications:
+➔ Channel modeling to compensate for distortion, fading, or interference.
+2. Biomedical signal processing:
+➔ Analysis and interpretation of signals such as EEG, ECG, EMG, etc.
+3. Radar and sonar systems:
+➔ Target detection, clutter modeling, and noise reduction.
+
+--- chunk 5 | 405 car ---
+3. Radar and sonar systems:
+➔ Target detection, clutter modeling, and noise reduction.
+4. Economics and finance:
+➔ Modeling and prediction of time series (prices, stock indices, volatility).
+5. Audio and speech:
+➔ Speech synthesis, audio coding, and noise suppression.5
+V. Generator processes  AR, MA and ARMA
+➔ The notion of the signal generator process has been developed and applied to digital filters.
+
+--- chunk 6 | 484 car ---
+➔ The notion of the signal generator process has been developed and applied to digital filters. 
+➔ These are the signal models most commonly used in statistical signal processing (estimation, prediction, etc.). 
+➔ Depending on the type of filter, different signal models can be obtained (AR, MA, ARMA, etc.).
+𝐻 𝑧 = σ𝑖=0
+𝑁 𝑏𝑖. 𝑧−𝑖
+σ𝑖=0
+𝑀 𝑎𝑖. 𝑧−𝑖 = σ𝑖=0
+𝑁 𝑏𝑖. 𝑧−𝑖
+1 + σ𝑖=1
+𝑀 𝑎𝑖. 𝑧−𝑖 𝑧 > 𝑟
+𝑦 𝑛 = − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑦 𝑛 − 𝑖 + ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑥(𝑛 − 𝑖)
+𝒉 𝒏 ? ?𝒙 𝒏 𝒚 𝒏6
+1. Autoregressive (AR) process
+
+--- chunk 7 | 494 car ---
+𝑦 𝑛 = − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑦 𝑛 − 𝑖 + ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑥(𝑛 − 𝑖)
+𝒉 𝒏 ? ?𝒙 𝒏 𝒚 𝒏6
+1. Autoregressive (AR) process
+In an autoregressive model, signals are obtained by passing white noise through a purely recursive filter. The linear 
+filter is an all-pole filter.
+𝐻 𝑧 = 1
+1 + σ𝑖=1
+𝑀 𝑎𝑖. 𝑧−𝑖
+𝑦 𝑛 = 𝑥(𝑛) − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑦 𝑛 − 𝑖
+𝑥(𝑛) is white noise 𝑹𝒙 𝒌 = 𝝈𝒙𝟐𝜹 𝒌
+𝝁𝒙 = 𝑬 𝒙 𝒏 = 0
+𝑹𝒙 𝟎 = 𝝈𝒙𝟐 𝒊𝒇 𝒌 = 𝟎
+𝑹𝒙 𝒌 = 𝑬 𝒙 𝒏 𝒙 𝒏 − 𝒌 = 𝟎 𝒊𝒇 𝒌 ≠ 𝟎7
+𝑹𝒚 𝒌 = 𝑬 𝒚 𝒏 𝒚 𝒏 − 𝒌 = E 𝑥(𝑛) − ෍
+𝑖=1
+𝑀
+𝑎𝑖𝑦 𝑛 − 𝑖 𝒚 𝒏 − 𝒌 = E 𝑥 𝑛 𝑦 𝑛 − 𝑘 − ෍
+𝑖=1
+𝑀
+
+--- chunk 8 | 491 car ---
+𝑹𝒚 𝒌 = 𝑬 𝒚 𝒏 𝒚 𝒏 − 𝒌 = E 𝑥(𝑛) − ෍
+𝑖=1
+𝑀
+𝑎𝑖𝑦 𝑛 − 𝑖 𝒚 𝒏 − 𝒌 = E 𝑥 𝑛 𝑦 𝑛 − 𝑘 − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑦 𝑛 − 𝑖 𝑦 𝑛 − 𝑘
+= E 𝑥 𝑛 𝑦 𝑛 − 𝑘 − E ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑦 𝑛 − 𝑖 𝑦 𝑛 − 𝑘 = E 𝑥 𝑛 𝑦 𝑛 − 𝑘 − ෍
+𝑖=1
+𝑀
+𝑎𝑖. E[𝑦 𝑛 − 𝑖 𝑦 𝑛 − 𝑘 ]
+= E 𝑥 𝑛 ෍
+𝑙=0
++∞
+ℎ(𝑙) 𝑥 𝑛 − 𝑘 − 𝑙 − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 = ෍
+𝑙=0
++∞
+ℎ(𝑙) E[𝑥 𝑛 𝑥 𝑛 − 𝑘 − 𝑙 ] − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 =
+෍
+𝑙=0
++∞
+ℎ(𝑙) 𝑹𝒙 𝑘 + 𝑙 − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 = 𝑹𝒙 𝑘 ℎ 0 + 𝑹𝒙 𝑘 + 1 ℎ 1 + ⋯ − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊
+𝒚 𝒏 real ➔𝑹𝒚 −𝒊 = 𝑹𝒚 𝒊
+𝑹𝒙 𝒌 = 𝑬 𝒙 𝒏 𝒙 𝒏 − 𝒌 = ቊ𝝈𝒙𝟐 𝒇𝒐𝒓 𝒌 = 𝟎
+𝟎 𝒇𝒐𝒓 𝒌 ≠ 𝟎
+
+--- chunk 9 | 443 car ---
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊
+𝒚 𝒏 real ➔𝑹𝒚 −𝒊 = 𝑹𝒚 𝒊
+𝑹𝒙 𝒌 = 𝑬 𝒙 𝒏 𝒙 𝒏 − 𝒌 = ቊ𝝈𝒙𝟐 𝒇𝒐𝒓 𝒌 = 𝟎
+𝟎 𝒇𝒐𝒓 𝒌 ≠ 𝟎
+The system is an all-pole filter ➔ ℎ 0 = 1So 𝒇𝒐𝒓 𝒌 = 𝟎, 𝑹𝒚 𝟎 = 𝑹𝒙 0 ℎ 0 − σ𝑖=1
+𝑀 𝑎𝑖. 𝑹𝒚 −𝒊
+= 𝝈𝟐 − ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒊
+𝒇𝒐𝒓 𝒌 ≠ 𝟎, 𝑹𝒚 𝒌 = 𝟎 − σ𝑖=1
+𝑀 𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 = − σ𝑖=1
+𝑀 𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊
+𝑹𝒚 𝒌 + ෍
+𝑖=1
+𝑀
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 = 𝝈𝒙𝟐 𝜹(𝒌)
+In matrix form :
+𝑹𝒚 𝟎 𝑹𝒚 𝟏 ⋯ 𝑹𝒚 𝑴
+𝑹𝒚 𝟏 𝑹𝒚 𝟎 ⋯ 𝑹𝒚 𝑴 − 𝟏
+𝑹𝒚 𝟐 𝑹𝒚 𝟏 ⋯ 𝑹𝒚 𝑴 − 𝟐
+⋮ ⋮ ⋮
+𝑹𝒚 𝑴 𝑹𝒚 𝑴 − 𝟏 ⋯ 𝑹𝒚 𝟎
+.
+𝟏
+𝒂𝟏
+𝒂𝟐
+⋮
+𝒂𝑴
+=
+𝝈𝒙𝟐
+𝟎
+𝟎
+⋮
+𝟎
+
+--- chunk 10 | 482 car ---
+𝑹𝒚 𝟏 𝑹𝒚 𝟎 ⋯ 𝑹𝒚 𝑴 − 𝟏
+𝑹𝒚 𝟐 𝑹𝒚 𝟏 ⋯ 𝑹𝒚 𝑴 − 𝟐
+⋮ ⋮ ⋮
+𝑹𝒚 𝑴 𝑹𝒚 𝑴 − 𝟏 ⋯ 𝑹𝒚 𝟎
+.
+𝟏
+𝒂𝟏
+𝒂𝟐
+⋮
+𝒂𝑴
+=
+𝝈𝒙𝟐
+𝟎
+𝟎
+⋮
+𝟎
+The filter parameters and the variance of the white noise are obtained by solving these Yule-Walker equations.9
+Exercises
+I. Consider the autoregressive AR (1) model of order 1:
+𝑦 𝑛 = −𝑎1𝑦 𝑛 − 1 + 𝑥(𝑛)
+➢ Find the Yule-Walker equations for this model.
+➢ Determine the 𝑹𝒚 𝒌 (assuming that 𝑎1, 𝝈𝒙𝟐 are known).
+Answer : 𝑅𝑦 𝑘 = (−𝑎1)𝑘 𝜎𝑥2
+1−𝑎12
+II. Consider the autoregressive model AR (1)
+
+--- chunk 11 | 488 car ---
+Answer : 𝑅𝑦 𝑘 = (−𝑎1)𝑘 𝜎𝑥2
+1−𝑎12
+II. Consider the autoregressive model AR (1)
+𝑦 𝑛 = −𝑎1𝑦 𝑛 − 1 + 𝑥(𝑛)
+The autocorrelation function 𝑹𝒚 𝒌 = 𝟏𝟎. 𝟎. 𝟓 𝒌
+➢ Determine the model parameters. 
+Answer : 𝑎1 = −0.5, 𝝈𝒙𝟐 = 7.510
+2. Moving average (MA) process
+Moving average signals are obtained by passing white noise through a pure transversal filter. Also known as a finite 
+impulse response filter (FIR).
+𝐻 𝑧 = ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑧−𝑖 => 𝑦 𝑛 = ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑥(𝑛 − 𝑖)
+𝝁𝒚 = 𝑬 𝒚 𝒕 = 𝑬 σ𝑖=0
+𝑁 𝑏𝑖. 𝑥 𝑛 − 𝑖 = σ𝑖=0
+
+--- chunk 12 | 477 car ---
+𝐻 𝑧 = ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑧−𝑖 => 𝑦 𝑛 = ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑥(𝑛 − 𝑖)
+𝝁𝒚 = 𝑬 𝒚 𝒕 = 𝑬 σ𝑖=0
+𝑁 𝑏𝑖. 𝑥 𝑛 − 𝑖 = σ𝑖=0
+𝑁 𝑏𝑖. 𝐸 𝑥 𝑛 − 𝑖 = σ𝑖=0
+𝑁 𝑏𝑖. 𝝁𝒙 = 𝝁𝒙 σ𝑖=0
+𝑁 𝑏𝑖 = 𝝁𝒙. 𝑯(𝟎)
+𝑹𝒚 𝒌 = 𝑬 𝒚 𝒏 𝒚 𝒏 − 𝒌 = 𝑬 ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑥(𝑛 − 𝑖) ෍
+𝑖=0
+𝑁
+𝑏𝑖. 𝑥(𝑛 − 𝑘 − 𝑖)
+𝑹𝒚 𝒌 = 𝑬 ෍
+𝑖=0
+𝑁
+𝑏𝑖 ෍
+𝑗=0
+𝑁
+𝑏𝑗. 𝑥(𝑛 − 𝑖)𝑥(𝑛 − 𝑘 − 𝑗) = ෍
+𝑖=0
+𝑁
+𝑏𝑖 ෍
+𝑗=0
+𝑁
+𝑏𝑗. 𝐸[𝑥 𝑛 − 𝑖 𝑥 𝑛 − 𝑘 − 𝑗 ]
+𝑹𝒚 𝒌 = ෍
+𝑖=0
+𝑁
+𝑏𝑖 ෍
+𝑗=0
+𝑁
+𝑏𝑗. 𝑹𝒙 𝒌 + 𝒋 − 𝒊11
+𝑹𝒚 𝒌 = ෍
+𝑖=0
+𝑁
+𝑏𝑖 ෍
+𝑗=0
+𝑁
+𝑏𝑗. 𝑹𝒙 𝒌 + 𝒋 − 𝒊
+So 𝒇𝒐𝒓 𝒌 + 𝒋 − 𝒊 ≠ 𝟎 => 𝒌 + 𝒋 ≠ 𝒊 => 𝑹𝒙 𝒌 + 𝒋 − 𝒊 = 𝟎 => 𝑹𝒚 𝒌 = 𝟎
+
+--- chunk 13 | 485 car ---
+𝑖=0
+𝑁
+𝑏𝑖 ෍
+𝑗=0
+𝑁
+𝑏𝑗. 𝑹𝒙 𝒌 + 𝒋 − 𝒊
+So 𝒇𝒐𝒓 𝒌 + 𝒋 − 𝒊 ≠ 𝟎 => 𝒌 + 𝒋 ≠ 𝒊 => 𝑹𝒙 𝒌 + 𝒋 − 𝒊 = 𝟎 => 𝑹𝒚 𝒌 = 𝟎
+𝒇𝒐𝒓 𝒌 + 𝒋 − 𝒊 = 𝟎 => 𝒊 = 𝒌 + 𝒋 => 𝑹𝒙 𝒌 + 𝒋 − 𝒊 = 𝝈𝒙𝟐
+=> 𝑹𝒚 𝒌 = 𝝈𝒙𝟐 ෍
+𝑗=0
+𝑁−𝑘
+𝑏𝑗+𝑘𝑏𝑗12
+Exercises
+I. Consider the following difference equation
+𝑦 𝑛 = 𝑥 𝑛 − 0.3𝑥 𝑛 − 3
+𝑥 𝑛 is a stationary normal process (SSS) with statistical autocorrelation of the input signal is assumed to be 𝑹𝒙 𝒌
+➢ Is the process 𝑦 𝑛 wide-sense stationary (WSS)?
+➢ Does the process 𝑦 𝑛 follow a Gaussian distribution?
+
+--- chunk 14 | 450 car ---
+➢ Does the process 𝑦 𝑛 follow a Gaussian distribution?
+➢ Is the process 𝑦 𝑛 strictly stationary (SSS)?
+Answer
+Question Answer Justification
+Is 𝑦 𝑛 WSS? Yes Linear combination of a WSS process
+Is 𝑦 𝑛 Gaussian? Yes Linear combination of a Gaussian process
+Is 𝑦 𝑛 SSS? Yes Strict stationarity is preserved under linear time-shift transformationsII. Consider the process 𝑦(𝑛), the model MA (2) with coefficients 𝑏1 and 𝑏2 and 𝑏0 = 1.
+➢ Write the process.
+
+--- chunk 15 | 489 car ---
+➢ Write the process.
+➢ Determine the coefficients and the variance of the model.
+Given that the process has the following properties :
+var(𝑦 𝑛 )= 18; 𝐶𝑜𝑣 𝑦 𝑛 , 𝑦 𝑛 + 1 = 12; 𝐶𝑜𝑣 𝑦 𝑛 , 𝑦 𝑛 + 2 = 6
+Answer
+Final MA(2) process : 𝑦 𝑛 = 𝑥 𝑛 + 𝑥 𝑛 − 1 + 𝑥 𝑛 − 2
+With 𝑥 𝑛 a Gaussian white noise with variance 𝜎𝑥2 = 6.14
+III. Consider the model MA(q) with 𝒃𝟎 = 1. The input to the filter is white noise of unit variance and the autocorrelation
+function is given by :
+𝑹𝒚 𝟎 =
+𝟓
+𝟒 , 𝑹𝒚 𝟏 = 𝟎, 𝑹𝒚 𝟐 =
+𝟏
+
+--- chunk 16 | 451 car ---
+function is given by :
+𝑹𝒚 𝟎 =
+𝟓
+𝟒 , 𝑹𝒚 𝟏 = 𝟎, 𝑹𝒚 𝟐 =
+𝟏
+𝟐 , 𝑹𝒚 𝒌 = 0, for 𝑘 ≥ 3
+➢ Write the process?
+➢ Determine the order of the model, the filter coefficients and the spectral density of the process.
+Answer
+𝑆y 𝑓 = 𝐻(𝑓) 2𝑆𝑥 𝑓 = 1 + 𝑏1𝑒−𝑗𝜔 + 𝑏2𝑒−2𝑗𝜔 2
+𝜎𝑥2 = 1 + 1
+2 𝑒−2𝑗𝜔
+2
+= 5
+4 + cos 2𝜔
+𝜔 = 2𝜋𝑓𝑇𝑒
+Item Value
+Model order MA(2)
+Coefficients 𝒃𝟎 = 1, 𝒃𝟏 = 0; 𝒃𝟐 = 1
+2
+Process 𝑦 𝑛 = 𝑥 𝑛 + 1
+2 𝑥 𝑛 − 2
+Spectral density 𝑆y 𝑓 = 5
+4 + cos 2𝜔15
+3. ARMA process
+
+--- chunk 17 | 431 car ---
+2
+Process 𝑦 𝑛 = 𝑥 𝑛 + 1
+2 𝑥 𝑛 − 2
+Spectral density 𝑆y 𝑓 = 5
+4 + cos 2𝜔15
+3. ARMA process
+An ARMA model represents a stable LTI system (a recursive filter IIR) excited by white noise. ARMA(p, q) combines
+AR(p) and MA(q) components.
+𝑦 𝑛 = − ෍
+𝑖=1
+𝑝
+𝑎𝑖. 𝑦 𝑛 − 𝑖 + ෍
+𝑖=0
+𝑞
+𝑏𝑖. 𝑥 𝑛 − 𝑖
+The statistical correlation of 𝑦 𝑛 is then written as : 
+𝑹𝒚 𝒌 = − ෍
+𝑖=1
+𝑝
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 + 𝜎𝑥2 ෍
+𝑗=0
+𝑞−𝑘
+𝑏𝑗+𝑘𝑏𝑗
+It's a non-linear equation in 𝑎𝑖 and 𝑏𝑖.
+
+--- chunk 18 | 486 car ---
+𝑹𝒚 𝒌 = − ෍
+𝑖=1
+𝑝
+𝑎𝑖. 𝑹𝒚 𝒌 − 𝒊 + 𝜎𝑥2 ෍
+𝑗=0
+𝑞−𝑘
+𝑏𝑗+𝑘𝑏𝑗
+It's a non-linear equation in 𝑎𝑖 and 𝑏𝑖.
+ARMA modelling combines an AR and a MA step. The AR model is simple to calculate using linear equations, whereas 
+the MA and ARMA models require non-linear equations. The ARMA model is more flexible and can model PSD minima 
+and maxima.16
+Properties
+1. Power Spectral Density Interpretation
+Transfer function: The transfer function has a numerator and a denominator representing the MA and AR
+
+--- chunk 19 | 470 car ---
+components, respectively. 
+𝐻 𝑧 =
+σ𝑖=0
+q 𝑏𝑖. 𝑧−𝑖
+1 + σ𝑖=1
+p 𝑎𝑖. 𝑧−𝑖 = 𝑁 𝑧
+𝐷 𝑧
+Power Spectral Density (PSD):
+𝑆y 𝑓 = 𝐻(𝑓) 2𝑆𝑥 𝑓 = ∣ 𝑁 𝑒𝑗2𝜋𝑓 ∣2
+∣ 𝐷 𝑒𝑗2𝜋𝑓 ∣2 𝜎𝑥2
+Widely used for parametric spectral estimation (e.g., Yule–Walker method).
+2. Stationarity and Invertibility Conditions
+ Stationarity (for AR part):
+The poles of 𝐻 𝑧  must lie inside the unit circle.
+ Invertibility (for MA part):
+The zeros of 𝐻 𝑧 must lie inside the unit circle.3. Notion of Memory in ARMA Models
+
+--- chunk 20 | 478 car ---
+The zeros of 𝐻 𝑧 must lie inside the unit circle.3. Notion of Memory in ARMA Models
+In an ARMA model, memory is defined as the way past observations and past innovations influence the current 
+observation.
+➔ Past observations correspond to the AR part, since the model reuses previous values of the signal:
+𝑦 𝑛 = − 𝑎1𝑦 𝑛 − 1 − 𝑎2𝑦 𝑛 − 2 − ⋯
+The AR  is a IIR (Infinite Impulse Response) filter.
+The AR memory is dynamic memory and the duration depends on the poles of the system:
+
+--- chunk 21 | 446 car ---
+The AR memory is dynamic memory and the duration depends on the poles of the system:
+If the poles are close to the unit circle:➝ long memory, slow decay of the autocorrelation.
+If the poles are far from the unit circle:➝ short memory, fast decay.
+➔ Past innovations correspond to the MA part, since the model incorporates past white-noise terms:
+𝑦 𝑛 = 𝑥 𝑛 + 𝑏1𝑥 𝑛 − 1 + 𝑏2𝑥 𝑛 − 2 + ⋯ + 𝑏q𝑥(𝑛 − 𝑞)
+The MA is a FIR (Finite Impulse Response) filter.
+
+--- chunk 22 | 478 car ---
+The MA is a FIR (Finite Impulse Response) filter.
+The influence of the noise 𝑥 𝑛 disappears completely after 𝑞 time steps.
+The MA memory is a finite memory and limited to the order 𝑞.
+Model Nature Filter Type Memory Duration Interpretation
+AR Recursive IIR Infinite (poles) Dependence on the 
+signal it self
+MA Non-recursive FIR Finite (q) Dependence on 
+past noises
+ARMA Mixed IIR Infinite
+Combination of 
+both types of 
+memory
+Summary4. Link between autocorrelation and memory
+
+--- chunk 23 | 467 car ---
+Combination of 
+both types of 
+memory
+Summary4. Link between autocorrelation and memory
+Autocorrelation indicates how much a signal resembles a time-shifted version of itself.
+The AR  is a IIR (Infinite Impulse Response) filter.
+If the autocorrelation decreases slowly → long-lasting influence → long memory
+If it drops to zero quickly → short-lived influence → short memory
+Model Memory Autocorrelation shape
+AR(p) Long Exponential decay
+MA(q) Short Zero after lag q
+
+--- chunk 24 | 440 car ---
+Model Memory Autocorrelation shape
+AR(p) Long Exponential decay
+MA(q) Short Zero after lag q
+ARMA(p,q) Mixed Zero for lags > q, then AR-type 
+exponential decayExercises
+I. We consider a stationary process 𝑦(𝑛) defined by the following model:
+𝑦 𝑛 = 0.6 𝑦 𝑛 − 1 − 0.15 𝑦 𝑛 − 2 + 𝑥 𝑛 + 0.5 𝑥(𝑛 − 1)
+where 𝑥(𝑛)is a white noise with variance
+𝜎𝑥2 = 2.
+1. Identify the ARMA model (give p and q).
+2. Give 𝐷 𝑧 , 𝑁 𝑧 , and the transfer function 𝐻 𝑧 .
+
+--- chunk 25 | 432 car ---
+1. Identify the ARMA model (give p and q).
+2. Give 𝐷 𝑧 , 𝑁 𝑧 , and the transfer function 𝐻 𝑧 .
+3. Give the expression of the power spectral density (PSD) 𝑆y 𝑓 .
+4. Check the stationarity of the model (analyze the poles).
+5. Check the invertibility (analyze the zeros).
+6. Describe the physical interpretation of this model.
+7. Compute an approximate value of the variance of the signal 𝑦 𝑛 .II. Consider the ARMA process defined by:
+
+--- chunk 26 | 410 car ---
+𝑦 𝑛 = 1.2 𝑦(𝑛 − 1)  − 0.7 𝑦(𝑛 − 2) + 𝑥(𝑛) − 0.4 𝑥(𝑛 − 1)  + 0.3 𝑥(𝑛 − 2)
+where 𝑥(𝑛) is white noise with variance 𝜎𝑥2 = 1.
+1. Identify the ARMA model (p, 𝑞).
+2. Give 𝐷 𝑧 , 𝑁 𝑧  ,and 𝐻 𝑧 .
+3. Study the stationarity (pole analysis).
+4. Study the invertibility (zero analysis).
+5. Write the power spectral density (PSD) of the process 𝑦(𝑛).
+6. Describe the temporal behavior of the signal (oscillations? damping?).
+
+--- chunk 27 | 453 car ---
+6. Describe the temporal behavior of the signal (oscillations? damping?).
+We give 𝐻 𝜔 = 𝑎 + 𝑏𝑒−𝑗𝜔 + 𝑐𝑒−2𝑗𝜔 =>∣ 𝐻 𝜔 ∣2= 𝑎2 + 𝑏2 + 𝑐2 + 2𝑎𝑏 cos 𝜔 + 2𝑏𝑐 cos 𝜔 + 2𝑎𝑐 cos 2 𝜔.
+Answer
+Property Result
+Model ARMA(2,2)
+Stationarity No 
+Invertibility Yes 
+Signal type Oscillatory and divergent25
+Chapter VI Introduction to Estimation
+I. Introduction
+➔ The fundamental task of modern signal processing and communication systems is to extract information from noisy
+
+--- chunk 28 | 418 car ---
+or incomplete data. This can be achieved using estimation and detection techniques. 
+➢ Estimate the power of a received signal, 
+➢ Determine the direction of arrival (DOA) of a wave, 
+➢ Detect the presence of a target in radar, 
+➢ Recover an original signal from a noisy measurement.
+II. Definition
+➔ An estimator is a mathematical function applied to observed data used to estimate an unknown parameter. 
+General form
+
+--- chunk 29 | 461 car ---
+General form
+Let 𝜃 be an unknown parameter (e.g., mean, variance, power, DOA…), and the sample be:
+𝑋 = 𝑋1 𝑋2 … 𝑋𝑁
+An estimator of 𝜃 is a random variable defined as:
+መ𝜃 = 𝑔 𝑋1 𝑋2 … 𝑋𝑁
+where 𝑔 ⋅  is a function chosen to approximate 𝜃.III. Estimators' properties
+1. Bias of an estimator
+The bias measures the difference between the expected value of the estimator and the true value.
+Bias መ𝜃 = 𝔼 መ𝜃 − 𝜃
+Bias መ𝜃 ቊ= 0 estimator unbiased 
+≠ 0 estimator biased
+Example
+
+--- chunk 30 | 490 car ---
+Bias መ𝜃 = 𝔼 መ𝜃 − 𝜃
+Bias መ𝜃 ቊ= 0 estimator unbiased 
+≠ 0 estimator biased
+Example 
+Estimation of the variance of a Gaussian random variable : 
+ො𝜎2 = 1
+𝑁 ෍
+1
+𝑁
+𝑋𝑖 − ത𝑋 2  This estimator is biased.
+ො𝜎2 = 1
+𝑁 − 1 ෍
+1
+𝑁
+𝑋𝑖 − ത𝑋 2  The unbiased version
+2. Variance of an estimator
+It measures the dispersion of the estimator around its expected value:
+Var መ𝜃 = 𝔼ൣ መ𝜃 − 𝔼 መ𝜃 )2
+A good estimator should have a low variance.3. Mean Squared Error (MSE)
+This is the most widely used quality criterion:
+
+--- chunk 31 | 484 car ---
+This is the most widely used quality criterion:
+MSE መ𝜃 = 𝔼ൣ መ𝜃 − 𝜃)2
+Important relationship:
+MSE = Variance + ቀBias)2
+4. Cramér–Rao Bound (CRB)
+For any unbiased estimator, the variance satisfies:
+𝑉𝑎𝑟 መ𝜃 ≥ 1
+𝐼 𝜃
+where: 𝐼 𝜃  =Fisher information
+𝐼 𝜃 = 𝔼 𝜕
+𝜕𝜃 𝑙𝑛 𝑓 𝑥 𝜃
+2
+𝑓 𝑥 𝜃 represents the probability density function (pdf) or the likelihood function.5. Efficiency
+An estimator is efficient if it achieves the theoretically minimum possible variance among all unbiased estimators. This
+
+--- chunk 32 | 499 car ---
+minimum limit is given by the Cramér–Rao Bound (CRB). 
+If an estimator satisfies:
+𝑉𝑎𝑟 መ𝜃 = 1
+𝐼 𝜃
+ It is optimal (efficient).
+IV. Estimation of Statistical Moments We aim to estimate:
+First-order moment: 𝑚1 = 𝔼 𝑋
+Second-order moment: 𝑚2 = 𝔼 𝑋2
+Second-order central moment (variance): 𝜎2 = 𝔼ൣ 𝑋 − 𝑚1)2
+Empirical Estimators
+First-order moment (mean)
+ෝ𝑚1 = 1
+𝑁 ෍
+𝑖=1
+𝑁
+𝑋𝑖
+Unbiased, with variance:
+Var ෝ𝑚1 = 𝜎2
+𝑁
+Second-order moment
+ෝ𝑚2 = 1
+𝑁 ෍
+𝑖=1
+𝑁
+𝑋𝑖
+2
+Variance
+Biased estimator:   ො𝜎𝑏
+2 = ෝ𝑚2 − ෝ𝑚1
+2
+
+--- chunk 33 | 480 car ---
+𝑁
+Second-order moment
+ෝ𝑚2 = 1
+𝑁 ෍
+𝑖=1
+𝑁
+𝑋𝑖
+2
+Variance
+Biased estimator:   ො𝜎𝑏
+2 = ෝ𝑚2 − ෝ𝑚1
+2
+Unbiased estimator:
+ො𝜎𝑢𝑛𝑏
+2 = 1
+𝑁 − 1 ෍
+𝑖=1
+𝑁
+𝑋𝑖 − ෝ𝑚1 2V. MVUE (Minimum Variance Unbiased Estimator)
+An MVUE is:
+➢ Unbiased
+➢ Has minimum variance
+➢ Achieves the Cramér–Rao Bound (optimal case)
+Exercise 1: Bias and variance
+Let 𝑋1, 𝑋2, … , 𝑋𝑁 be an i.i.d. sample from a normal distribution 𝒩 𝜇 𝜎2 .
+Show that the the empirical mean ത𝑋 is an unbiased estimator of 𝜇.
+ത𝑋 = 1
+𝑁 ෍
+𝑖=1
+𝑁
+𝑋𝑖
+
+--- chunk 34 | 488 car ---
+Show that the the empirical mean ത𝑋 is an unbiased estimator of 𝜇.
+ത𝑋 = 1
+𝑁 ෍
+𝑖=1
+𝑁
+𝑋𝑖
+Show that the empirical variance መ𝑆2 is an unbiased estimator of 𝜎2.
+መ𝑆2 = 1
+𝑁 − 1 ෍
+1
+𝑁
+𝑋𝑖 − ത𝑋 2Exercise 2
+We want to estimate an unknown real parameter 𝜃.
+We have a random sample 𝑋1, … , 𝑋𝑁 that is i.i.d. with mean 𝜃 and finite variance 𝜎2.
+We consider the following three estimators:
+መ𝜃1 = ത𝑋 − 1,  መ𝜃2 = 0.8 ത𝑋,  መ𝜃3 = ത𝑋,
+where
+ത𝑋 = 1
+𝑛 ෍
+𝑖=1
+𝑛
+𝑋𝑖 .
+1. Compute, for each estimator መ𝜃1, መ𝜃2, መ𝜃3:
+
+--- chunk 35 | 476 car ---
+where
+ത𝑋 = 1
+𝑛 ෍
+𝑖=1
+𝑛
+𝑋𝑖 .
+1. Compute, for each estimator መ𝜃1, መ𝜃2, መ𝜃3:
+a. Its bias,
+b. Its variance,
+c. Its MSE 𝑀𝑆𝐸 መ𝜃𝑗 = 𝐸ൣ መ𝜃𝑗 − 𝜃)2 .
+2.   For each estimator, determine whether it is:
+a. Unbiased or biased,
+b. More or less dispersed than ത𝑋.
+3.   Using the MSE, compare the three estimators and indicate which one seems best to you for estimating 𝜃.
+4. Qualitatively represent on the same axis the probability density (or concentration curve) of each estimator around 𝜃,
+
+--- chunk 36 | 349 car ---
+and explain how the bias and the variance appear on these curves.Estimator Expression Bias ෠𝜃𝑗
+Variance 
+Var ෠𝜃𝑗
+𝑀𝑆𝐸 ෠𝜃𝑗
+= 𝑉𝑎𝑟
++ Bias2
+unbiased? Dispersion
+መ𝜃1 ത𝑋 − 1 −1 𝜎2
+𝑛 1 + 𝜎2
+𝑛
+Biased Same variance 
+as ത𝑋
+መ𝜃2 0.8 ത𝑋 0.8 𝜃 − 𝜃
+= −0.2𝜃 0.64 𝜎2
+𝑛
+(0.2𝜃)2
++ 0.64 𝜎2
+𝑛
+Biased Lower variance 
+than ത𝑋
+መ𝜃3 ത𝑋 0 𝜎2
+𝑛
+𝜎2
+𝑛
+Unbiased Reference 
+Variance
+
