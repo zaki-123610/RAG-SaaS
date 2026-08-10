@@ -15,7 +15,7 @@ collection = client.get_collection(name="test", embedding_function=embedding_fn)
 
 groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-question = "pourquoi il faut un modele multilingue"
+question = "quelle est la capitale du Japon"
 
 resultat = collection.query(query_texts=[question], n_results=3)
 contexte = "\n\n".join(resultat["documents"][0])
