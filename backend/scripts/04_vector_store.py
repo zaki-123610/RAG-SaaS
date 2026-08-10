@@ -4,7 +4,7 @@ from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import re
 
-# --- reprise du script 03 : PDF -> chunks ---
+
 reader = PdfReader("data/test2.pdf")
 texte = ""
 for page in reader.pages:
@@ -22,19 +22,19 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_size=500, chunk_overlap=100,
     separators=["\n\n", "\n", ". ", " ", ""],
 )
-chunks = splitter.split_text(texte)      # ← chunks naît ici
+chunks = splitter.split_text(texte)      
 
 
-def est_lisible(chunk):                   # ← puis la fonction
+def est_lisible(chunk):                   
     lettres = sum(c.isalpha() and c.isascii() for c in chunk)
     return lettres / max(len(chunk), 1) > 0.5
 
 
-chunks = [c for c in chunks if est_lisible(c)]   # ← puis le filtre
+chunks = [c for c in chunks if est_lisible(c)]   
 
 print("chunks apres filtre :", len(chunks))
 
-# --- nouveau : stockage dans ChromaDB ---
+
 embedding_fn = SentenceTransformerEmbeddingFunction(
     model_name="paraphrase-multilingual-MiniLM-L12-v2"
 )
