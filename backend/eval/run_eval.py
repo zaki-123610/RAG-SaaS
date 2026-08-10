@@ -5,7 +5,6 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 sys.path.append(".")
 from eval.golden_set import GOLDEN_SET
 
-TOP_K = 3
 
 embedding_fn = SentenceTransformerEmbeddingFunction(
     model_name="paraphrase-multilingual-MiniLM-L12-v2"
@@ -14,21 +13,25 @@ embedding_fn = SentenceTransformerEmbeddingFunction(
 client = chromadb.PersistentClient(path="chroma_db")
 collection = client.get_collection(name="test", embedding_function=embedding_fn)
 
+TOP_K = 3
+
 hits = 0
 echecs = []
 
 for item in GOLDEN_SET:
     resultat = collection.query(query_texts=[item["question"]], n_results=TOP_K)
-    trouves = resultat["ids"][0]
+    textes = resultat["documents"][0]
 
-    if item["expected"] in trouves:
+    trouve = any(item["expected"].lower() in t.lower() for t in textes)
+
+    if trouve:
         hits += 1
         statut = "OK "
     else:
         statut = "RATE"
         echecs.append(item)
 
-    print(statut, "|", item["expected"], "| top3:", trouves, "|", item["question"][:45])
+    print(statut, "|", item["question"][:45])
 
 total = len(GOLDEN_SET)
 print()
@@ -38,4 +41,4 @@ if echecs:
     print()
     print("ECHECS :")
     for e in echecs:
-        print(" -", e["question"], "-> attendait", e["expected"])
+        print(" -", e["question"], "-> cherchait:", e["expected"])
