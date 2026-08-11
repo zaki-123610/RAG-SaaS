@@ -25,6 +25,10 @@ groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 def answer(question: str, bot_id: str) -> str:
     """Question -> chunks pertinents -> reponse redigee par le LLM."""
     chunks = search(question, bot_id)
+
+    if not chunks:
+        return "Aucun document n'a ete trouve pour ce chatbot."
+
     contexte = "\n\n".join(chunks)
 
     reponse = groq.chat.completions.create(
