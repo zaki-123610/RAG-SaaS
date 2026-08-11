@@ -10,7 +10,7 @@ from eval.golden_set import GOLDEN_SET
 CONFIGS = [(300, 80), (500, 100), (800, 150)]
 TOP_K = 3
 
-reader = PdfReader("data/test.pdf")
+reader = PdfReader("data/test2.pdf")
 texte = "".join(p.extract_text() for p in reader.pages)
 
 embedding_fn = SentenceTransformerEmbeddingFunction(
