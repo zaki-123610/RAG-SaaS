@@ -24,6 +24,10 @@ def lire_pdf(path: str) -> str:
         texte += page.extract_text()
     return texte
 
+def est_lisible(chunk: str) -> bool:
+    """Ecarte les chunks composes majoritairement de symboles."""
+    lettres = sum(c.isalpha() and c.isascii() for c in chunk)
+    return lettres / max(len(chunk), 1) > 0.5
 
 def split_pdf(path: str) -> list[str]:
     """PDF -> liste de chunks nettoyes."""
@@ -34,4 +38,5 @@ def split_pdf(path: str) -> list[str]:
         chunk_overlap=CHUNK_OVERLAP,
         separators=SEPARATEURS,
     )
-    return splitter.split_text(texte)
+    chunks = splitter.split_text(texte)
+    return [c for c in chunks if est_lisible(c)]
