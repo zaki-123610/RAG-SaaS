@@ -18,3 +18,10 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+backend/uploads/
+backend/chroma_db/
+backend/sortie.txt
+
+backend/data/*
+!backend/data/.gitkeep
+
