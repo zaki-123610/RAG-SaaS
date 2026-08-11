@@ -1,19 +1,15 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+from app.routes import router
 
+app = FastAPI(title="RAG SaaS")
 
-class GenerateRequest(BaseModel):
-    code: str
-    language: str = "javascript"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
-
-
-@app.post("/generate")
-async def generate(body: GenerateRequest):
-    return {"received": len(body.code), "language": body.language}
+app.include_router(router)
