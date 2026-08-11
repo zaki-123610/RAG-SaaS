@@ -1,44 +1,33 @@
 import sys
-import chromadb
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 sys.path.append(".")
 from eval.golden_set import GOLDEN_SET
+from rag.retrieval import search
 
-
-embedding_fn = SentenceTransformerEmbeddingFunction(
-    model_name="paraphrase-multilingual-MiniLM-L12-v2"
-)
-
-client = chromadb.PersistentClient(path="chroma_db")
-collection = client.get_collection(name="test", embedding_function=embedding_fn)
-
-TOP_K = 3
+BOT_ID = "demo"
 
 hits = 0
 echecs = []
 
 for item in GOLDEN_SET:
-    resultat = collection.query(query_texts=[item["question"]], n_results=TOP_K)
-    textes = resultat["documents"][0]
+    chunks = search(item["question"], BOT_ID)
 
-    trouve = any(item["expected"].lower() in t.lower() for t in textes)
+    trouve = False
+    for t in chunks:
+        if item["expected"].lower() in t.lower():
+            trouve = True
+            break
 
     if trouve:
         hits += 1
-        statut = "OK "
+        print("OK  |", item["question"][:45])
     else:
-        statut = "RATE"
         echecs.append(item)
-
-    print(statut, "|", item["question"][:45])
+        print("RATE |", item["question"][:45])
 
 total = len(GOLDEN_SET)
 print()
 print(f"HIT RATE : {hits}/{total} = {round(hits / total * 100, 1)}%")
 
-if echecs:
-    print()
-    print("ECHECS :")
-    for e in echecs:
-        print(" -", e["question"], "-> cherchait:", e["expected"])
+for e in echecs:
+    print(" -", e["question"], "-> cherchait:", e["expected"])

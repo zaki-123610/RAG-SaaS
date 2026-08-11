@@ -29,13 +29,12 @@ def est_lisible(chunk: str) -> bool:
     lettres = sum(c.isalpha() and c.isascii() for c in chunk)
     return lettres / max(len(chunk), 1) > 0.5
 
-def split_pdf(path: str) -> list[str]:
-    """PDF -> liste de chunks nettoyes."""
+def split_pdf(path: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
     texte = nettoyer(lire_pdf(path))
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP,
+        chunk_size=chunk_size,
+        chunk_overlap=overlap,
         separators=SEPARATEURS,
     )
     chunks = splitter.split_text(texte)
