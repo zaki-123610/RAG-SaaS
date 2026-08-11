@@ -1,12 +1,21 @@
+import os
+
 import chromadb
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+from chromadb.utils.embedding_functions import JinaEmbeddingFunction
+from dotenv import load_dotenv
 
 from rag.chunking import split_pdf
 
-EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+load_dotenv()
+
+EMBEDDING_MODEL = "jina-embeddings-v3"
 CHROMA_PATH = "chroma_db"
 
-embedding_fn = SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL)
+embedding_fn = JinaEmbeddingFunction(
+    api_key=os.getenv("JINA_API_KEY"),
+    model_name=EMBEDDING_MODEL,
+)
+
 client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 

@@ -1,19 +1,13 @@
 import sys
 
-import chromadb
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
 sys.path.append(".")
 from eval.golden_set import GOLDEN_SET
 from rag.chunking import split_pdf
-from rag.store import EMBEDDING_MODEL, CHROMA_PATH
+from rag.store import embedding_fn, client
 
 CONFIGS = [(300, 80), (500, 100), (800, 150)]
 TOP_K = 3
 PDF = "data/test2.pdf"
-
-embedding_fn = SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL)
-client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 for size, overlap in CONFIGS:
     chunks = split_pdf(PDF, chunk_size=size, overlap=overlap)
