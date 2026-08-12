@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { uploadPdf, askQuestion, BOT_ID } from "./api";
 import Header from "./components/Header";
 import Uploader from "./components/Uploader";
@@ -27,21 +27,27 @@ export default function App() {
     setError("");
   }
 
-  async function handleUpload() {
-    if (!file || uploading) return;
-    setUploading(true);
+async function handleUpload() {
+  if (!file || uploading) return;
+  setUploading(true);
+  setError("");
+  const timer = setTimeout(
+    () => setError("Le serveur démarre, cela peut prendre 1 minute…"),
+    4000
+  );
+  try {
+    const data = await uploadPdf(file);
+    setChunks(data.chunks);
+    setIndexed(true);
     setError("");
-    try {
-      const data = await uploadPdf(file);
-      setChunks(data.chunks);
-      setIndexed(true);
-    } catch (e) {
-      setError(e.message);
-      setIndexed(false);
-    } finally {
-      setUploading(false);
-    }
+  } catch (e) {
+    setError(e.message);
+    setIndexed(false);
+  } finally {
+    clearTimeout(timer);
+    setUploading(false);
   }
+}
 
   async function handleSend() {
     const q = question.trim();
@@ -68,7 +74,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header ready={indexed} onReset={reset} botId={BOT_ID} />
+      <Header ready={indexed} onReset={reset} />
       <div className="layout">
         <aside className="sidebar">
           <Uploader
@@ -86,6 +92,7 @@ export default function App() {
           onQuestion={setQuestion}
           onSend={handleSend}
           asking={asking}
+          disabled={!indexed}
         />
       </div>
     </div>

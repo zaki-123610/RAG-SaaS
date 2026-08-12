@@ -6,7 +6,10 @@ export async function uploadPdf(file) {
   fd.append("bot_id", BOT_ID);
   fd.append("file", file);
   const res = await fetch(API + "/upload", { method: "POST", body: fd });
-  if (!res.ok) throw new Error("HTTP " + res.status);
+  if (!res.ok) {
+  const body = await res.json().catch(() => ({}));
+  throw new Error(body.detail || "HTTP " + res.status);
+    }
   return res.json(); // { bot_id, chunks }
 }
 
@@ -16,6 +19,9 @@ export async function askQuestion(question) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ bot_id: BOT_ID, question }),
   });
-  if (!res.ok) throw new Error("HTTP " + res.status);
+  if (!res.ok) {
+  const body = await res.json().catch(() => ({}));
+  throw new Error(body.detail || "HTTP " + res.status);
+    }
   return res.json(); // { answer }
 }
