@@ -4,8 +4,12 @@ from datetime import datetime, timedelta, timezone
 import bcrypt
 from dotenv import load_dotenv
 from jose import JWTError, jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from db.users import get_user_by_id
 
 load_dotenv()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 SECRET = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
@@ -40,3 +44,22 @@ def decode_token(token: str) -> int | None:
         return int(payload["sub"])
     except (JWTError, KeyError, ValueError):
         return None
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
+    """Lit le token, retourne le user. Leve 401 si invalide."""
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Token invalide ou expire.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    user_id = decode_token(token)
+    if user_id is None:
+        raise credentials_error
+
+    user = get_user_by_id(user_id)
+    if user is None:
+        raise credentials_error
+
+    return user

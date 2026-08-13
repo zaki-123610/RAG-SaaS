@@ -8,6 +8,9 @@ from pydantic import BaseModel
 from rag.store import index_document
 from rag.generation import answer
 
+from fastapi import Depends
+from app.security import get_current_user
+
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
@@ -23,6 +26,9 @@ class QueryRequest(BaseModel):
 async def health() -> dict[str, str]:
     return {"status": "ok"}
 
+@router.get("/me")
+async def me(user: dict = Depends(get_current_user)) -> dict:
+    return user
 
 @router.post("/upload")
 async def upload(bot_id: str = Form(...), file: UploadFile = File(...)) -> dict:
