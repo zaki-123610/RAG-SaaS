@@ -1,100 +1,97 @@
-import { useState } from "react";
-import { uploadPdf, askQuestion, BOT_ID } from "./api";
-import Header from "./components/Header";
-import Uploader from "./components/Uploader";
-import DocStatus from "./components/DocStatus";
-import HowItWorks from "./components/HowItWorks";
-import Chat from "./components/Chat";
+import { useState, useEffect } from "react";
+import * as api from "./api";
+import Landing from "./components/Landing";
+import Login from "./components/Login";
+import Profile from "./components/Profile";
+import Dashboard from "./components/Dashboard";
+import ChatScreen from "./components/ChatScreen";
 import "./styles.css";
 
-const now = () =>
-  new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-
 export default function App() {
-  const [file, setFile] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [question, setQuestion] = useState("");
-  const [chunks, setChunks] = useState(0);
-  const [indexed, setIndexed] = useState(false);
-  const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [asking, setAsking] = useState(false);
+  const [user, setUser] = useState(null);
+  const [booting, setBooting] = useState(!!api.getToken());
+  const [bots, setBots] = useState([]);
+  const [botId, setBotId] = useState("");
+  const [screen, setScreen] = useState("landing");   // landing | auth
+  const [authMode, setAuthMode] = useState("login");
+  const [view, setView] = useState("bots");          // bots | profile
 
-  function pickFile(f) {
-    setFile(f);
-    setIndexed(false);
-    setChunks(0);
-    setError("");
+  useEffect(() => {
+    if (!api.getToken()) return;
+    (async () => {
+      try {
+        setUser(await api.me());
+        setBots(await api.listBots());
+      } catch {
+        api.clearToken();
+      } finally {
+        setBooting(false);
+      }
+    })();
+  }, []);
+
+  async function handleAuth(mode, email, password) {
+    await (mode === "login" ? api.login : api.register)(email, password);
+    setUser(await api.me());
+    setBots(await api.listBots());
   }
 
-async function handleUpload() {
-  if (!file || uploading) return;
-  setUploading(true);
-  setError("");
-  const timer = setTimeout(
-    () => setError("Le serveur démarre, cela peut prendre 1 minute…"),
-    4000
-  );
-  try {
-    const data = await uploadPdf(file);
-    setChunks(data.chunks);
-    setIndexed(true);
-    setError("");
-  } catch (e) {
-    setError(e.message);
-    setIndexed(false);
-  } finally {
-    clearTimeout(timer);
-    setUploading(false);
+  function logout() {
+    api.clearToken();
+    setUser(null);
+    setBots([]);
+    setBotId("");
+    setScreen("landing");
+    setView("bots");
   }
-}
 
-  async function handleSend() {
-    const q = question.trim();
-    if (!q || asking) return;
-    setMessages((m) => [...m, { q, t: now(), a: "…", ta: "" }]);
-    setQuestion("");
-    setAsking(true);
-    let answer;
+  async function createBot(name) {
+    const bot = await api.createBot(name);
+    setBots((b) => [...b, bot]);
+  }
+
+  async function refreshBots() {
     try {
-      answer = (await askQuestion(q)).answer;
-    } catch (e) {
-      answer = "Erreur — " + e.message;
+      setBots(await api.listBots());
+    } catch {
+      /* le prochain rendu réessaiera */
     }
-    setMessages((m) =>
-      m.map((msg, i) => (i === m.length - 1 ? { ...msg, a: answer, ta: now() } : msg))
-    );
-    setAsking(false);
   }
 
-  function reset() {
-    setFile(null); setMessages([]); setQuestion("");
-    setChunks(0); setIndexed(false); setError("");
+  if (booting) return <div className="boot">Chargement…</div>;
+
+  if (!user) {
+    if (screen === "landing") {
+      return (
+        <Landing
+          onLogin={() => { setAuthMode("login"); setScreen("auth"); }}
+          onRegister={() => { setAuthMode("register"); setScreen("auth"); }}
+        />
+      );
+    }
+    return <Login mode={authMode} onSubmit={handleAuth} />;
+  }
+
+  if (botId) {
+    return (
+      <ChatScreen
+        bot={bots.find((b) => b.id === botId)}
+        onBack={() => setBotId("")}
+        onUploaded={refreshBots}
+        onUnauthorized={logout}
+      />
+    );
   }
 
   return (
-    <div className="app">
-      <Header ready={indexed} onReset={reset} />
-      <div className="layout">
-        <aside className="sidebar">
-          <Uploader
-            file={file}
-            onPick={pickFile}
-            onUpload={handleUpload}
-            uploading={uploading}
-          />
-          <DocStatus file={file} chunks={chunks} indexed={indexed} error={error} />
-          <HowItWorks />
-        </aside>
-        <Chat
-          messages={messages}
-          question={question}
-          onQuestion={setQuestion}
-          onSend={handleSend}
-          asking={asking}
-          disabled={!indexed}
-        />
-      </div>
-    </div>
+    <Dashboard
+      bots={bots}
+      view={view}
+      onView={setView}
+      onOpen={setBotId}
+      onCreate={createBot}
+      onLogout={logout}
+      profile={<Profile user={user} bots={bots} />}
+    />
   );
 }
