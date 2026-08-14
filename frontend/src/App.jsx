@@ -91,6 +91,7 @@ export default function App() {
       onOpen={setBotId}
       onCreate={createBot}
       onLogout={logout}
+      onUnauthorized={logout}
       profile={<Profile user={user} bots={bots} />}
     />
   );

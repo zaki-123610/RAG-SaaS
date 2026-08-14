@@ -7,6 +7,9 @@ const now = () =>
   new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
 export default function ChatScreen({ bot, onBack, onUploaded, onUnauthorized }) {
+
+  if (!bot) return null;
+
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
@@ -37,10 +40,17 @@ export default function ChatScreen({ bot, onBack, onUploaded, onUnauthorized }) 
     setError("");
   }
 
-  async function upload() {
+async function upload() {
     if (!file || uploading) return;
     setUploading(true);
     setError("");
+
+    // Timer pour le "Cold Start" de Render (si l'upload prend plus de 4s)
+    const timer = setTimeout(
+      () => setError("Le serveur démarre, cela peut prendre 1 minute…"),
+      4000
+    );
+
     try {
       await api.uploadPdf(bot.id, file);
       // le total cumulé n'est lisible que via /bots
@@ -53,6 +63,7 @@ export default function ChatScreen({ bot, onBack, onUploaded, onUnauthorized }) 
       if (e.status === 401) return onUnauthorized();
       setError(e.message);
     } finally {
+      clearTimeout(timer); // On annule le timer si la requête se termine
       setUploading(false);
     }
   }

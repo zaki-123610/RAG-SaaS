@@ -3,23 +3,49 @@ import gsap from "gsap";
 import Sidebar from "./Sidebar";
 import BotCard from "./BotCard";
 
-export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogout, profile }) {
+export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogout, onUnauthorized, profile }) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const input = useRef(null);
   const main = useRef(null);
   const grid = useRef(null);
+  const viewTween = useRef(null);
+  const cardTween = useRef(null);
+  const seen = useRef(0); // nombre de bots deja animes, pour ne jouer l entree qu une fois
 
   useEffect(() => {
-    const root = document.querySelector(".dash");
-    if (root) gsap.fromTo(root.children, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out" });
+    if (view === "profile" || !main.current) return;
+    viewTween.current?.kill();
+    viewTween.current = gsap.fromTo(
+      main.current.children,
+      { y: 18, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out", clearProps: "transform,opacity" }
+    );
   }, [view]);
 
   useEffect(() => {
-    const cards = grid.current && grid.current.children;
+    const cards = grid.current && [...grid.current.children];
     if (!cards || !cards.length) return;
-    gsap.fromTo(cards[cards.length - 1], { y: 22, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" });
+
+    const nouvelles = cards.slice(seen.current);
+    seen.current = cards.length;
+    if (!nouvelles.length) return;
+
+    cardTween.current?.kill();
+    cardTween.current = gsap.fromTo(
+      nouvelles,
+      { y: 22, opacity: 0, scale: 0.96 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)", clearProps: "transform,opacity" }
+    );
+
+    // jauges de memoire : remplissage anime depuis la gauche
+    nouvelles.forEach((card) => {
+      const fill = card.querySelector(".gauge-fill");
+      if (!fill) return;
+      const cible = fill.style.width;
+      gsap.fromTo(fill, { width: "0%" }, { width: cible, duration: 0.6, delay: 0.2, ease: "power2.out" });
+    });
   }, [bots.length]);
 
   async function create(e) {
@@ -32,6 +58,7 @@ export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogo
       await onCreate(n);
       setName("");
     } catch (err) {
+      if (err.status === 401) return onUnauthorized();
       setError(err.message);
     } finally {
       setBusy(false);

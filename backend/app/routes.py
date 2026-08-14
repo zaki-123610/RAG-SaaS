@@ -63,12 +63,17 @@ async def upload(
 ) -> dict:
     check_owner(user["id"], bot_id)
 
+    if file.content_type != "application/pdf":
+        raise HTTPException(400, "Seuls les fichiers PDF sont acceptes.")
+
     chemin = UPLOAD_DIR / f"{uuid.uuid4()}.pdf"
     with chemin.open("wb") as f:
         shutil.copyfileobj(file.file, f)
 
     try:
         n = index_document(str(chemin), bot_id)
+    except Exception:
+        raise HTTPException(400, "PDF invalide ou illisible.")
     finally:
         chemin.unlink(missing_ok=True)
 

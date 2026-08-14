@@ -10,7 +10,8 @@ export default function Sidebar({ view, onView, onLogout }) {
 
       <nav className="sidebar-nav">
         <button
-          className={view === "bots" ? "nav-item nav-item-active" : "nav-item"}
+          type="button"
+          className={"nav-item" + (view === "bots" ? " nav-item-active" : "")}
           onClick={() => onView("bots")}
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -19,8 +20,10 @@ export default function Sidebar({ view, onView, onLogout }) {
           </svg>
           Mes bots
         </button>
+
         <button
-          className={view === "profile" ? "nav-item nav-item-active" : "nav-item"}
+          type="button"
+          className={"nav-item" + (view === "profile" ? " nav-item-active" : "")}
           onClick={() => onView("profile")}
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
