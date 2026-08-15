@@ -4,6 +4,9 @@ from pydantic import BaseModel, EmailStr
 from app.security import hash_password, verify_password, create_token
 from db.users import create_user, get_user_by_email
 
+from fastapi import Request
+from app.limiter import limiter
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -18,7 +21,8 @@ class TokenResponse(BaseModel):
 
 
 @router.post("/register", response_model=TokenResponse)
-async def register(body: Credentials):
+@limiter.limit("5/hour")
+async def register(request: Request,body: Credentials):
     if len(body.password) < 8:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -36,7 +40,8 @@ async def register(body: Credentials):
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(body: Credentials):
+@limiter.limit("10/minute")
+async def login(request: Request,body: Credentials):
     user = get_user_by_email(body.email)
 
     if not user or not verify_password(body.password, user["password"]):

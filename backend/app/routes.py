@@ -2,13 +2,15 @@ import shutil
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status, Request
 from pydantic import BaseModel
 
 from app.security import get_current_user
 from db.bots import add_chunks, create_bot, list_bots, user_owns_bot
 from rag.generation import answer
 from rag.store import index_document
+
+from app.limiter import limiter
 
 router = APIRouter()
 
@@ -57,7 +59,9 @@ async def my_bots(user: dict = Depends(get_current_user)) -> list[dict]:
 
 
 @router.post("/upload")
+@limiter.limit("10/hour")
 async def upload(
+    request: Request,
     bot_id: str = Form(...),
     file: UploadFile = File(...),
     user: dict = Depends(get_current_user),
@@ -100,6 +104,7 @@ async def upload(
     return {"bot_id": bot_id, "chunks": n}
 
 @router.post("/query")
-async def query(body: QueryRequest, user: dict = Depends(get_current_user)) -> dict:
+@limiter.limit("30/minute")
+async def query(request: Request, body: QueryRequest, user: dict = Depends(get_current_user)) -> dict:
     check_owner(user["id"], body.bot_id)
     return {"answer": answer(body.question, body.bot_id)}
