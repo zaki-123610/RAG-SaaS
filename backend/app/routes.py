@@ -14,7 +14,8 @@ router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
-
+MAX_UPLOAD_MB = 10
+MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
 
 class QueryRequest(BaseModel):
     bot_id: str
@@ -64,22 +65,39 @@ async def upload(
     check_owner(user["id"], bot_id)
 
     if file.content_type != "application/pdf":
-        raise HTTPException(400, "Seuls les fichiers PDF sont acceptes.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Seuls les fichiers PDF sont acceptes.",
+        )
 
     chemin = UPLOAD_DIR / f"{uuid.uuid4()}.pdf"
-    with chemin.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
+    taille = 0
 
     try:
-        n = index_document(str(chemin), bot_id)
-    except Exception:
-        raise HTTPException(400, "PDF invalide ou illisible.")
+        with chemin.open("wb") as f:
+            while morceau := file.file.read(1024 * 1024):
+                taille += len(morceau)
+                if taille > MAX_UPLOAD_BYTES:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"Fichier trop volumineux (max {MAX_UPLOAD_MB} Mo).",
+                    )
+                f.write(morceau)
+
+        try:
+            n = index_document(str(chemin), bot_id)
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="PDF invalide ou illisible.",
+            )
     finally:
         chemin.unlink(missing_ok=True)
 
     add_chunks(bot_id, n)
     return {"bot_id": bot_id, "chunks": n}
-
 
 @router.post("/query")
 async def query(body: QueryRequest, user: dict = Depends(get_current_user)) -> dict:
