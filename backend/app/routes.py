@@ -10,6 +10,8 @@ from db.bots import add_chunks, create_bot, list_bots, user_owns_bot
 from rag.generation import answer
 from rag.store import index_document
 
+from rag.store import index_document, list_documents
+
 from app.limiter import limiter
 
 router = APIRouter()
@@ -89,7 +91,7 @@ async def upload(
                 f.write(morceau)
 
         try:
-            n = index_document(str(chemin), bot_id)
+            n = index_document(str(chemin), bot_id, file.filename or "document.pdf")
         except HTTPException:
             raise
         except Exception:
@@ -102,6 +104,12 @@ async def upload(
 
     add_chunks(bot_id, n)
     return {"bot_id": bot_id, "chunks": n}
+
+
+@router.get("/bots/{bot_id}/documents")
+async def bot_documents(bot_id: str, user: dict = Depends(get_current_user)) -> list[dict]:
+    check_owner(user["id"], bot_id)
+    return list_documents(bot_id)
 
 @router.post("/query")
 @limiter.limit("30/minute")
