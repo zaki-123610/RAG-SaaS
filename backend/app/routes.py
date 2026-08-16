@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from pydantic import BaseModel
 
 from app.security import get_current_user
-from db.bots import add_chunks, create_bot, list_bots, user_owns_bot
+from db.bots import create_bot, list_bots, user_owns_bot
 from rag.generation import answer
 from rag.store import index_document
 
@@ -102,7 +102,7 @@ async def upload(
     finally:
         chemin.unlink(missing_ok=True)
 
-    add_chunks(bot_id, n)
+    
     return {"bot_id": bot_id, "chunks": n}
 
 

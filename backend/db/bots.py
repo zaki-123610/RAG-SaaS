@@ -15,10 +15,17 @@ def create_bot(user_id: int, name: str) -> str:
 
 
 def list_bots(user_id: int) -> list[dict]:
-    """Retourne tous les bots d un user."""
+    """Retourne tous les bots d un user, avec le nombre reel de chunks."""
     with pool.connection() as conn:
         rows = conn.execute(
-            "SELECT id, name, chunks FROM bots WHERE user_id = %s ORDER BY created_at DESC",
+            """
+            SELECT b.id, b.name, COUNT(c.id)
+            FROM bots b
+            LEFT JOIN chunks c ON c.bot_id = b.id
+            WHERE b.user_id = %s
+            GROUP BY b.id, b.name, b.created_at
+            ORDER BY b.created_at DESC
+            """,
             (user_id,),
         ).fetchall()
     return [{"id": r[0], "name": r[1], "chunks": r[2]} for r in rows]
@@ -34,10 +41,3 @@ def user_owns_bot(user_id: int, bot_id: str) -> bool:
     return row is not None
 
 
-def add_chunks(bot_id: str, n: int) -> None:
-    """Incremente le compteur de chunks apres un upload."""
-    with pool.connection() as conn:
-        conn.execute(
-            "UPDATE bots SET chunks = chunks + %s WHERE id = %s",
-            (n, bot_id),
-        )
