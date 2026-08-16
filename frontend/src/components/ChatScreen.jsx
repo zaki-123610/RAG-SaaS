@@ -18,6 +18,8 @@ export default function ChatScreen({ bot, onBack, onUploaded, onUnauthorized }) 
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
+  const [docs, setDocs] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(true);
   const scroller = useRef(null);
   const layout = useRef(null);
 
@@ -33,6 +35,21 @@ export default function ChatScreen({ bot, onBack, onUploaded, onUnauthorized }) 
       gsap.fromTo(last.children, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, stagger: 0.09, ease: "power2.out" });
     }
   }, [messages]);
+
+  async function loadDocs() {
+    try {
+      setDocs(await api.listDocuments(bot.id));
+    } catch (e) {
+      if (e.status === 401) return onUnauthorized();
+    } finally {
+      setDocsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    setDocsLoading(true);
+    loadDocs();
+  }, [bot.id]);
 
   function pick(f) {
     setFile(f);
@@ -58,6 +75,7 @@ async function upload() {
       const fresh = list.find((b) => b.id === bot.id);
       setChunks(fresh ? fresh.chunks : 0);
       setUploaded(true);
+      await loadDocs();
       if (onUploaded) onUploaded();
     } catch (e) {
       if (e.status === 401) return onUnauthorized();
@@ -113,6 +131,8 @@ async function upload() {
           uploaded={uploaded}
           error={error}
           chunks={chunks}
+          docs={docs}
+          docsLoading={docsLoading}
         />
 
         <section className="card conversation">

@@ -65,6 +65,12 @@ export async function createBot(name) {
   ); // { id, name, chunks }
 }
 
+export async function listDocuments(botId) {
+  return unwrap(
+    await fetch(API + "/bots/" + encodeURIComponent(botId) + "/documents", { headers: auth() })
+  ); // [{ id, filename, chunks }]
+}
+
 /* ---- rag ---- */
 
 // /upload renvoie les chunks DU DOCUMENT ; le total cumulé vit dans /bots

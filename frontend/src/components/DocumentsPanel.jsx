@@ -1,7 +1,7 @@
 import { useRef } from "react";
 
 export default function DocumentsPanel({
-  file, onPick, onUpload, uploading, uploaded, error, chunks,
+  file, onPick, onUpload, uploading, uploaded, error, chunks, docs = [], docsLoading,
 }) {
   const input = useRef(null);
 
@@ -71,6 +71,28 @@ export default function DocumentsPanel({
         </button>
 
         {error && <p className="error">{error}</p>}
+      </section>
+
+      <section className="card doc-list">
+        <span className="section-label">Documents ({docs.length})</span>
+
+        {docsLoading ? (
+          <span className="muted-13">Chargement…</span>
+        ) : docs.length === 0 ? (
+          <span className="muted-13">Aucun document uploadé pour ce bot.</span>
+        ) : (
+          docs.map((d) => (
+            <div className="doc-row" key={d.id}>
+              <span className="doc-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" /><path d="M14 2v5h6" />
+                </svg>
+              </span>
+              <span className="doc-name" title={d.filename}>{d.filename}</span>
+              <span className="doc-chunks">{d.chunks} AI Mem.</span>
+            </div>
+          ))
+        )}
       </section>
 
       <section className="card stat-card">
