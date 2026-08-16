@@ -4,13 +4,15 @@ sys.path.append(".")
 from eval.golden_set import GOLDEN_SET
 from rag.retrieval import search
 
-BOT_ID = "demo"
+BOT_ID = "53102b228515"
 
 hits = 0
 echecs = []
 
 for item in GOLDEN_SET:
     chunks = search(item["question"], BOT_ID)
+    print("DEBUG", BOT_ID, "->", len(chunks), "chunks")
+    trouve = False
 
     trouve = False
     for t in chunks:
