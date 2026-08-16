@@ -2,6 +2,21 @@
 
 Plateforme SaaS multi-tenant de Retrieval-Augmented Generation : chaque utilisateur crée un ou plusieurs **bots**, upload des PDF qui y sont indexés, puis pose des questions dont la réponse est générée uniquement à partir du contenu indexé (isolation stricte par utilisateur et par bot).
 
+## Qualité du retrieval
+
+Hit rate mesuré sur un golden set de 16 questions (français) contre un
+document technique en anglais — test cross-lingual.
+
+| Itération                              | Hit rate |
+|----------------------------------------|----------|
+| Baseline                               | 75.0 %   |
+| Labels du golden set corrigés          | 81.2 %   |
+| Nettoyage des symboles mathématiques   | 93.8 %   |
+| Migration pgvector + task query/passage| 93.8 %   |
+
+Chaque changement de chunking ou de modèle est validé par `eval/run_eval.py`
+avant d'être déployé.
+
 ## Stack technique
 
 **Backend**
@@ -29,25 +44,28 @@ RAG-SaaS/
 │   │
 │   ├── app/                          # Application FastAPI
 │   │   ├── main.py                   # Point d'entrée FastAPI (CORS, startup → init_db, routers)
-│   │   ├── routes.py                 # Routes /health, /me, /bots, /upload, /query
+│   │   ├── routes.py                 # Routes /health, /me, /bots, /bots/{id}/documents, /upload, /query
 │   │   ├── auth_routes.py            # Routes /auth/register, /auth/login
-│   │   └── security.py               # Hashing bcrypt, JWT, get_current_user
+│   │   ├── security.py               # Hashing bcrypt, JWT, get_current_user
+│   │   └── limiter.py                # Rate limiting (slowapi) sur auth, upload et query
 │   │
 │   ├── db/                           # Accès base de données
 │   │   ├── connection.py             # Pool de connexion + init_db()
-│   │   ├── schema.sql                # Schéma SQL (users, bots)
+│   │   ├── schema.sql                # Schéma SQL (users, bots, documents, chunks + extension pgvector)
 │   │   ├── users.py                  # Requêtes users
 │   │   └── bots.py                   # Requêtes bots (dont user_owns_bot)
 │   │
 │   ├── rag/                          # Pipeline RAG
 │   │   ├── chunking.py               # Extraction PDF + découpage en chunks
-│   │   ├── retrieval.py              # Récupération des chunks pertinents (top_k)
+│   │   ├── embeddings.py             # Appel Jina AI, vecteurs 1024 dimensions
+│   │   ├── retrieval.py              # Récupération des chunks pertinents (pgvector, top_k)
 │   │   ├── generation.py             # Contexte + question → réponse LLM (Groq)
-│   │   └── store.py                  # Vector store Chroma, index_document()
+│   │   ├── store.py                  # Indexation Postgres/pgvector, index_document(), list_documents()
+│   │   └── legacy_store_chromadb.py / legacy_retrieval_chromadb.py  # Anciennes versions (ChromaDB, avant migration pgvector), gardées à titre de référence
 │   │
 │   ├── eval/                         # Évaluation du pipeline RAG
 │   │   ├── golden_set.py             # Jeu de questions/réponses de référence
-│   │   ├── run_eval.py               # Hit-rate du retrieval en place (embeddings Jina)
+│   │   ├── run_eval.py               # Hit-rate du retrieval en place (embeddings Jina, pgvector)
 │   │   ├── sweep.py                  # Comparaison de tailles de chunk/overlap
 │   │   └── legacy_*_sentencetransformers.py  # Anciennes versions (autre modèle d'embedding, gardées à titre de référence)
 │   │
@@ -55,7 +73,6 @@ RAG-SaaS/
 │   │   ├── 01_embeddings.py … 05_retrieval.py
 │   │   └── rag_test.py
 │   │
-│   ├── chroma_db/                    # Base vectorielle Chroma (données binaires, non versionné)
 │   ├── data/                         # Documents sources (PDF de test)
 │   └── uploads/                      # Fichiers uploadés (temporaires, supprimés après indexation)
 │
