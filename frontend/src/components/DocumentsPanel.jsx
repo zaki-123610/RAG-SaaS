@@ -1,7 +1,7 @@
 import { useRef } from "react";
 
 export default function DocumentsPanel({
-  file, onPick, onUpload, uploading, uploaded, error, chunks, docs = [], docsLoading,
+  file, onPick, onUpload, uploading, uploaded, error, chunks, docs = [], docsLoading, onDeleteDoc,
 }) {
   const input = useRef(null);
 
@@ -90,6 +90,18 @@ export default function DocumentsPanel({
               </span>
               <span className="doc-name" title={d.filename}>{d.filename}</span>
               <span className="doc-chunks">{d.chunks} AI Mem.</span>
+              <button
+                type="button"
+                className="icon-danger"
+                title={"Supprimer " + d.filename}
+                aria-label={"Supprimer " + d.filename}
+                onClick={() => onDeleteDoc(d.id)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18" /><path d="M8 6V4h8v2" />
+                  <path d="M6 6l1 14h10l1-14" /><path d="M10 11v6" /><path d="M14 11v6" />
+                </svg>
+              </button>
             </div>
           ))
         )}

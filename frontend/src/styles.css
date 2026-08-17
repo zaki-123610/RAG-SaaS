@@ -551,7 +551,7 @@ h1, h2 { margin: 0; letter-spacing: -0.02em; }
 
 .doc-row {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-columns: 32px minmax(0, 1fr) auto 32px;
   align-items: center;
   gap: 12px;
 }
@@ -569,3 +569,13 @@ h1, h2 { margin: 0; letter-spacing: -0.02em; }
 }
 
 .doc-chunks { font-size: 12.5px; color: var(--muted-2); white-space: nowrap; }
+
+.icon-danger {
+  width: 32px; height: 32px; flex: none; padding: 0;
+  border: 0; border-radius: 8px; background: transparent;
+  color: #7d5a58; cursor: pointer;
+  display: grid; place-items: center;
+}
+.icon-danger:hover { background: #1c0709; color: var(--brand-soft); }
+.icon-danger:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.icon-danger > svg { display: block; }

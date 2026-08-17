@@ -58,6 +58,17 @@ export default function App() {
     }
   }
 
+  async function removeBot(id) {
+    if (!window.confirm("Supprimer ce bot et toute son AI Memory ? Cette action est définitive.")) return;
+    try {
+      await api.deleteBot(id);
+      if (botId === id) setBotId("");
+      await refreshBots();
+    } catch (e) {
+      if (e.status === 401) logout();
+    }
+  }
+
   if (booting) return <div className="boot">Chargement…</div>;
 
   if (!user) {
@@ -92,7 +103,7 @@ export default function App() {
       onCreate={createBot}
       onLogout={logout}
       onUnauthorized={logout}
-      profile={<Profile user={user} bots={bots} />}
+      profile={<Profile user={user} bots={bots} onDeleteBot={removeBot} />}
     />
   );
 }

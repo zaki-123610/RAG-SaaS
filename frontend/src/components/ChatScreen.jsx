@@ -51,6 +51,20 @@ export default function ChatScreen({ bot, onBack, onUploaded, onUnauthorized }) 
     loadDocs();
   }, [bot.id]);
 
+  async function removeDoc(docId) {
+    if (!window.confirm("Supprimer ce document et son AI Memory ?")) return;
+    try {
+      await api.deleteDocument(bot.id, docId);
+      await loadDocs();
+      const list = await api.listBots();
+      const fresh = list.find((b) => b.id === bot.id);
+      setChunks(fresh ? fresh.chunks : 0);
+      if (onUploaded) onUploaded();
+    } catch (e) {
+      if (e.status === 401) onUnauthorized();
+    }
+  }
+
   function pick(f) {
     setFile(f);
     setUploaded(false);
@@ -133,6 +147,7 @@ async function upload() {
           chunks={chunks}
           docs={docs}
           docsLoading={docsLoading}
+          onDeleteDoc={removeDoc}
         />
 
         <section className="card conversation">

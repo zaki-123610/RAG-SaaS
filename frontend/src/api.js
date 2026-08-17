@@ -12,6 +12,7 @@ async function unwrap(res) {
     err.status = res.status;
     throw err;
   }
+  if (res.status === 204) return null;
   return res.json();
 }
 
@@ -69,6 +70,21 @@ export async function listDocuments(botId) {
   return unwrap(
     await fetch(API + "/bots/" + encodeURIComponent(botId) + "/documents", { headers: auth() })
   ); // [{ id, filename, chunks }]
+}
+
+export async function deleteBot(botId) {
+  return unwrap(
+    await fetch(API + "/bots/" + encodeURIComponent(botId), { method: "DELETE", headers: auth() })
+  );
+}
+
+export async function deleteDocument(botId, docId) {
+  return unwrap(
+    await fetch(
+      API + "/bots/" + encodeURIComponent(botId) + "/documents/" + encodeURIComponent(docId),
+      { method: "DELETE", headers: auth() }
+    )
+  );
 }
 
 /* ---- rag ---- */

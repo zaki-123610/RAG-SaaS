@@ -1,7 +1,7 @@
 import BotIcon from "./BotIcon";
 import { botColor, memPct } from "../config";
 
-export default function Profile({ user, bots }) {
+export default function Profile({ user, bots, onDeleteBot }) {
   const memory = bots.reduce((n, b) => n + b.chunks, 0);
   const average = bots.length ? Math.round(memory / bots.length) : 0;
 
@@ -81,6 +81,18 @@ export default function Profile({ user, bots }) {
                   <span className="gauge-fill" style={{ width: memPct(b.chunks) + "%", background: c.color }} />
                 </span>
                 <span className="mini-value">{b.chunks} AI Mem.</span>
+                <button
+                  type="button"
+                  className="icon-danger"
+                  title={"Supprimer " + b.name}
+                  aria-label={"Supprimer " + b.name}
+                  onClick={() => onDeleteBot(b.id)}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18" /><path d="M8 6V4h8v2" />
+                    <path d="M6 6l1 14h10l1-14" /><path d="M10 11v6" /><path d="M14 11v6" />
+                  </svg>
+                </button>
               </div>
             );
           })
@@ -94,13 +106,6 @@ export default function Profile({ user, bots }) {
             <path d="M12 9v4" /><path d="M12 17h.01" />
           </svg>
           Zone de danger
-        </div>
-        <div className="danger-row">
-          <div>
-            <strong>Supprimer un bot</strong>
-            <span>Efface le bot et toutes ses données AI Memory — nécessite <code>DELETE /bots/{"{id}"}</code></span>
-          </div>
-          <button className="btn-outline-danger" disabled title="Endpoint backend manquant">Supprimer un bot</button>
         </div>
         <div className="danger-row">
           <div>
