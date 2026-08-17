@@ -49,3 +49,61 @@ def delete_bot(user_id: int, bot_id: str) -> bool:
             (bot_id, user_id),
         ).fetchone()
     return row is not None
+
+def get_public_bot(bot_id: str) -> dict | None:
+    """Retourne un bot publie, ou None s il n existe pas ou n est pas publie."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            """
+            SELECT id, name, allowed_origins, daily_limit
+            FROM bots
+            WHERE id = %s AND is_public = TRUE
+            """,
+            (bot_id,),
+        ).fetchone()
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "name": row[1],
+        "allowed_origins": row[2] or [],
+        "daily_limit": row[3],
+    }
+
+
+def count_queries_today(bot_id: str) -> int:
+    """Nombre de questions publiques posees a ce bot aujourd hui."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) FROM public_queries
+            WHERE bot_id = %s AND created_at >= CURRENT_DATE
+            """,
+            (bot_id,),
+        ).fetchone()
+    return row[0]
+
+
+def log_query(bot_id: str, question: str) -> None:
+    """Enregistre une question publique."""
+    with pool.connection() as conn:
+        conn.execute(
+            "INSERT INTO public_queries (bot_id, question) VALUES (%s, %s)",
+            (bot_id, question),
+        )
+
+
+def set_public(user_id: int, bot_id: str, is_public: bool, origins: list[str]) -> bool:
+    """Publie ou depublie un bot. False si le bot n appartient pas au user."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            """
+            UPDATE bots SET is_public = %s, allowed_origins = %s
+            WHERE id = %s AND user_id = %s
+            RETURNING id
+            """,
+            (is_public, origins, bot_id, user_id),
+        ).fetchone()
+    return row is not None
+
+

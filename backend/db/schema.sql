@@ -34,3 +34,17 @@ CREATE TABLE IF NOT EXISTS chunks (
 
 CREATE INDEX IF NOT EXISTS idx_chunks_bot ON chunks(bot_id);
 CREATE INDEX IF NOT EXISTS idx_documents_bot ON documents(bot_id);
+
+ALTER TABLE bots ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT FALSE;
+ALTER TABLE bots ADD COLUMN IF NOT EXISTS allowed_origins TEXT[] DEFAULT '{}';
+ALTER TABLE bots ADD COLUMN IF NOT EXISTS daily_limit INTEGER DEFAULT 100;
+
+CREATE TABLE IF NOT EXISTS public_queries (
+    id         SERIAL PRIMARY KEY,
+    bot_id     TEXT NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
+    question   TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_public_queries_bot_date
+    ON public_queries(bot_id, created_at);
