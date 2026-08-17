@@ -41,3 +41,11 @@ def user_owns_bot(user_id: int, bot_id: str) -> bool:
     return row is not None
 
 
+def delete_bot(user_id: int, bot_id: str) -> bool:
+    """Supprime un bot et tout son contenu. False si non trouve."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            "DELETE FROM bots WHERE id = %s AND user_id = %s RETURNING id",
+            (bot_id, user_id),
+        ).fetchone()
+    return row is not None

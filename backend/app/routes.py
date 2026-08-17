@@ -14,6 +14,9 @@ from rag.store import index_document, list_documents
 
 from app.limiter import limiter
 
+from db.bots import create_bot, delete_bot, list_bots, user_owns_bot
+from rag.store import delete_document, index_document, list_documents
+
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
@@ -110,6 +113,30 @@ async def upload(
 async def bot_documents(bot_id: str, user: dict = Depends(get_current_user)) -> list[dict]:
     check_owner(user["id"], bot_id)
     return list_documents(bot_id)
+
+
+@router.delete("/bots/{bot_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_bot(bot_id: str, user: dict = Depends(get_current_user)):
+    if not delete_bot(user["id"], bot_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ce bot n'existe pas ou ne vous appartient pas.",
+        )
+
+
+@router.delete("/bots/{bot_id}/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_document(
+    bot_id: str,
+    document_id: int,
+    user: dict = Depends(get_current_user),
+):
+    check_owner(user["id"], bot_id)
+    if not delete_document(bot_id, document_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document introuvable.",
+        )
+
 
 @router.post("/query")
 @limiter.limit("30/minute")

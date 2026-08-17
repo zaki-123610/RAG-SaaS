@@ -44,3 +44,12 @@ def list_documents(bot_id: str) -> list[dict]:
             (bot_id,),
         ).fetchall()
     return [{"id": r[0], "filename": r[1], "chunks": r[2]} for r in rows]
+
+def delete_document(bot_id: str, document_id: int) -> bool:
+    """Supprime un document et ses chunks. False si non trouve."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            "DELETE FROM documents WHERE id = %s AND bot_id = %s RETURNING id",
+            (document_id, bot_id),
+        ).fetchone()
+    return row is not None
