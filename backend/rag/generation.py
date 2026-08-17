@@ -7,7 +7,7 @@ from rag.retrieval import search
 
 load_dotenv()
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 TEMPERATURE = 0.1
 
 SYSTEM_PROMPT = (
