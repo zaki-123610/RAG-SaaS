@@ -22,6 +22,31 @@ export default function Sidebar({ view, onView, onLogout }) {
         </button>
 
         <button
+          className={"nav-item" + (view === "publish" ? " nav-item-active" : "")}
+          type="button"
+          onClick={() => onView("publish")}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 17V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12" />
+            <path d="M2 17h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" />
+            <path d="M12 7v6" /><path d="m9.5 9.5 2.5-2.5 2.5 2.5" />
+          </svg>
+          Publier bot
+        </button>
+
+        <button
+          className={"nav-item" + (view === "docs" ? " nav-item-active" : "")}
+          type="button"
+          onClick={() => onView("docs")}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5V5a2 2 0 0 1 2-2h13v18H6.5A2.5 2.5 0 0 0 4 19.5z" />
+            <path d="M8 7h7" /><path d="M8 11h7" />
+          </svg>
+          Documentation
+        </button>
+
+        <button
           type="button"
           className={"nav-item" + (view === "profile" ? " nav-item-active" : "")}
           onClick={() => onView("profile")}

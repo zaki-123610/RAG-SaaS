@@ -9,3 +9,7 @@ export const BOT_COLORS = [
 
 export const botColor = (i) => BOT_COLORS[i % BOT_COLORS.length];
 export const memPct = (chunks) => Math.min(100, Math.round((chunks / MEMORY_CAP) * 100));
+
+// défauts réels de backend/static/widget.js
+export const WIDGET_DEFAULTS = { color: "#CD1C18", position: "bottom-right", title: "Assistant" };
+export const WIDGET_COLORS = ["#CD1C18", "#2563EB", "#8B5CF6", "#10B981"];

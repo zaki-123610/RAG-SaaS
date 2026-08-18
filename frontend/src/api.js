@@ -56,6 +56,19 @@ export async function listBots() {
   return unwrap(await fetch(API + "/bots", { headers: auth() })); // [{ id, name, chunks }]
 }
 
+export const API_ORIGIN = API;
+
+// PATCH /bots/{bot_id}/publish  { is_public, allowed_origins }
+export async function publishBot(botId, isPublic, allowedOrigins = []) {
+  return unwrap(
+    await fetch(API + "/bots/" + encodeURIComponent(botId) + "/publish", {
+      method: "PATCH",
+      headers: { ...auth(), "Content-Type": "application/json" },
+      body: JSON.stringify({ is_public: isPublic, allowed_origins: allowedOrigins }),
+    })
+  );
+}
+
 export async function createBot(name) {
   return unwrap(
     await fetch(API + "/bots", {

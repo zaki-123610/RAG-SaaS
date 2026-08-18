@@ -3,7 +3,7 @@ import gsap from "gsap";
 import Sidebar from "./Sidebar";
 import BotCard from "./BotCard";
 
-export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogout, onUnauthorized, profile }) {
+export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogout, onUnauthorized, profile, publish, docs }) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -69,7 +69,7 @@ export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogo
     <div className="shell">
       <Sidebar view={view} onView={onView} onLogout={onLogout} />
 
-      {view === "profile" ? profile : (
+      {view === "profile" ? profile : view === "publish" ? publish : view === "docs" ? docs : (
       <main className="dash" ref={main}>
         <div className="dash-head">
           <div>

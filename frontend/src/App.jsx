@@ -5,6 +5,8 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Dashboard from "./components/Dashboard";
 import ChatScreen from "./components/ChatScreen";
+import Publish from "./components/Publish";
+import Docs from "./components/Docs";
 import "./styles.css";
 
 export default function App() {
@@ -104,6 +106,8 @@ export default function App() {
       onLogout={logout}
       onUnauthorized={logout}
       profile={<Profile user={user} bots={bots} onDeleteBot={removeBot} />}
+      publish={<Publish bots={bots} onUnauthorized={logout} onDocs={() => setView("docs")} />}
+      docs={<Docs onPublish={() => setView("publish")} />}
     />
   );
 }
