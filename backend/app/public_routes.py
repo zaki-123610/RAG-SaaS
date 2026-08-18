@@ -1,19 +1,19 @@
-
-from urllib.request import Request
-from backend.db.bots import count_queries_today, get_public_bot, log_query
-from backend.rag.generation import answer
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-from backend.app import limiter
-from backend.app.routes import PublicQueryRequest
+from fastapi import APIRouter, Header, HTTPException, Request, status
 from pydantic import BaseModel
 
+from app.limiter import limiter
+from db.bots import count_queries_today, get_public_bot, log_query
+from rag.generation import answer
+
 public_router = APIRouter()
+
 
 class PublicQueryRequest(BaseModel):
     bot_id: str
     question: str
 
-@public_router.post("/public/query")
+
+@public_router.post("/query")
 @limiter.limit("20/minute")
 async def public_query(
     request: Request,
@@ -48,4 +48,3 @@ async def public_query(
 
     log_query(body.bot_id, question)
     return {"answer": answer(question, body.bot_id)}
-    

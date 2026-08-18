@@ -10,6 +10,7 @@ from slowapi.util import get_remote_address
 
 from fastapi.staticfiles import StaticFiles
 from app.limiter import limiter
+from app.public_routes import public_router
 
 limiter = Limiter(key_func=get_remote_address)
 
