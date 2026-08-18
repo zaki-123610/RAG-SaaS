@@ -38,7 +38,7 @@
       .thread { flex:1; overflow-y:auto; padding:14px; background:#f7f7f8; }
       .msg { margin-bottom:10px; padding:9px 12px; border-radius:10px; font-size:14px; line-height:1.5; }
       .q { background:${COLOR}; color:#fff; margin-left:40px; }
-      .a { background:#fff; border:1px solid #e5e5e5; margin-right:40px; white-space:pre-wrap; }
+      .a { background:#fff; border:1px solid #e5e5e5; margin-right:40px; white-space:pre-wrap; color:#111; }
       .bar { display:flex; gap:8px; padding:10px; border-top:1px solid #eee; }
       .bar input { flex:1; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none; }
       .bar button { padding:9px 16px; background:${COLOR}; color:#fff; border:none; border-radius:8px; cursor:pointer; }
