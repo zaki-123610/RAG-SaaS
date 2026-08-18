@@ -4,15 +4,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import router
 from app.auth_routes import router as auth_router
 from db.connection import init_db
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+
 
 from fastapi.staticfiles import StaticFiles
 from app.limiter import limiter
 from app.public_routes import public_router
 
-limiter = Limiter(key_func=get_remote_address)
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+
 
 
 app = FastAPI(title="RAG SaaS")
@@ -40,6 +43,25 @@ public_app.add_middleware(
     allow_headers=["Content-Type"],
 )
 public_app.include_router(public_router)
+
+class PublicCORS(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        if not request.url.path.startswith("/public"):
+            return await call_next(request)
+
+        if request.method == "OPTIONS":
+            reponse = Response(status_code=200)
+        else:
+            reponse = await call_next(request)
+
+        reponse.headers["Access-Control-Allow-Origin"] = "*"
+        reponse.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        reponse.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        reponse.headers["Access-Control-Max-Age"] = "600"
+        return reponse
+
+
+app.add_middleware(PublicCORS)
 
 app.mount("/public", public_app)
 app.mount("/static", StaticFiles(directory="static"), name="static")
