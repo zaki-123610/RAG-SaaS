@@ -187,7 +187,18 @@ async def public_query(
     log_query(body.bot_id, question)
     return {"answer": answer(question, body.bot_id)}
 
-
+@router.patch("/bots/{bot_id}/publish")
+async def publish_bot(
+    bot_id: str,
+    body: PublishRequest,
+    user: dict = Depends(get_current_user),
+) -> dict:
+    if not set_public(user["id"], bot_id, body.is_public, body.allowed_origins):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ce bot n'existe pas ou ne vous appartient pas.",
+        )
+    return {"bot_id": bot_id, "is_public": body.is_public, "allowed_origins": body.allowed_origins}
 
 @router.post("/query")
 @limiter.limit("30/minute")
