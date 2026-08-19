@@ -1,4 +1,9 @@
 # DocuMind (RAG-SaaS)
+**[Démo](https://rag-saa-s-theta.vercel.app)** · **[API](https://rag-saas-mdmd.onrender.com/docs)**
+
+> Le backend tourne sur le plan gratuit Render : le premier appel
+> peut prendre ~1 minute (cold start).
+
 
 Plateforme SaaS multi-tenant de Retrieval-Augmented Generation : chaque utilisateur crée un ou plusieurs **bots**, upload des PDF qui y sont indexés, puis pose des questions dont la réponse est générée uniquement à partir du contenu indexé (isolation stricte par utilisateur et par bot). Chaque bot peut aussi être **publié** comme widget de chat embarquable sur un site tiers.
 
@@ -12,6 +17,8 @@ document technique en anglais — test cross-lingual.
 | Baseline                               | 75.0 %   |
 | Labels du golden set corrigés          | 81.2 %   |
 | Nettoyage des symboles mathématiques   | 93.8 %   |
+| Passage aux embeddings API             | 87.5 %   |  
+|  (Jina, via ChromaDB)                  |          |
 | Migration pgvector + task query/passage| 93.8 %   |
 
 Chaque changement de chunking ou de modèle est validé par `eval/run_eval.py`
@@ -26,7 +33,7 @@ avant d'être déployé.
 - Base vectorielle : pgvector (colonne `embedding vector(1024)` sur `chunks`)
 - Embeddings : Jina AI (`jina-embeddings-v3`)
 - Chunking : LangChain `RecursiveCharacterTextSplitter`, `pypdf` pour l'extraction PDF
-- LLM : Groq (`llama-3.3-70b-versatile`), prompt system anti-hallucination
+- LLM : Groq (`openai/gpt-oss-120b`), prompt system anti-hallucination
 - Rate limiting (`slowapi`) : `/auth/register` 5/h, `/auth/login` 10/min, `/upload` 10/h, `/query` 30/min, `/public/query` 20/min
 - Widget embarquable : `backend/static/widget.js` servi statiquement, interroge `/public/query` (CORS ouvert, sans JWT)
 
@@ -180,3 +187,21 @@ Depuis l'écran « Publier bot » du frontend, un utilisateur choisit un bot, un
 ## Évaluation du RAG
 
 Le dossier [backend/eval/](backend/eval/) contient un jeu de données de référence (`golden_set.py`) et des scripts pour mesurer la qualité du retrieval (`run_eval.py`, embeddings Jina — ceux réellement utilisés en production) et comparer différentes tailles de chunk/overlap (`sweep.py`). Les fichiers `legacy_*_sentencetransformers.py` utilisent un autre modèle d'embedding et servent de référence historique, pas de mesure de la qualité en production.
+
+## Choix techniques
+
+**Pas de framework RAG (LangChain, LlamaIndex).** Chaque étape —
+chunking, embedding, retrieval, prompt — est écrite explicitement
+pour pouvoir être mesurée et débuggée isolément. Une chaîne LCEL
+donne une mauvaise réponse sans dire d'où vient le problème.
+
+**Embeddings via API plutôt qu'en local.** `sentence-transformers`
++ PyTorch dépassaient les 512 Mo du plan gratuit Render (OOM au
+démarrage). L'API Jina ramène l'empreinte à ~80 Mo et le build de
+15 à 3 minutes.
+
+**pgvector plutôt que ChromaDB.** Le disque Render est éphémère :
+les vecteurs disparaissaient à chaque redémarrage pendant que le
+compteur Postgres continuait d'afficher les chunks. Une seule base
+règle la persistance et rend les `ON DELETE CASCADE` réellement
+effectifs.
