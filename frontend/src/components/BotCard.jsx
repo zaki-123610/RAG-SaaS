@@ -40,12 +40,6 @@ export default function BotCard({ bot, index, onOpen }) {
         </svg>
         Discuter
       </button>
-
-      <button className="dots" type="button" aria-label="Options">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="5" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="12" cy="19" r="1.6" />
-        </svg>
-      </button>
     </article>
   );
 }
