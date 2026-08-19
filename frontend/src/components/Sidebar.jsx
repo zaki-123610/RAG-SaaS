@@ -1,17 +1,52 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import gsap from "gsap";
 import Logo from "./Logo";
 
 export default function Sidebar({ view, onView, onLogout }) {
   const [open, setOpen] = useState(false);
+  const root = useRef(null);
+  const burger = useRef(null);
 
-  // sur mobile / tablette la nav est repliée derrière le bouton menu
+  const items = () => (root.current ? root.current.querySelectorAll(".nav-item") : []);
+
+  const spin = (dir) =>
+    gsap.fromTo(
+      burger.current,
+      { rotate: dir * 90 },
+      { rotate: 0, duration: 0.4, ease: "back.out(2)", clearProps: "rotate" }
+    );
+
+  function toggle() {
+    if (!open) {
+      setOpen(true);
+      requestAnimationFrame(() => {
+        gsap.from(items(), { y: -12, opacity: 0, duration: 0.36, stagger: 0.05, ease: "power3.out", clearProps: "all" });
+        spin(-1);
+      });
+      return;
+    }
+    const els = items();
+    spin(1);
+    gsap.to(els, {
+      y: -8,
+      opacity: 0,
+      duration: 0.2,
+      ease: "power2.in",
+      stagger: { each: 0.035, from: "end" },
+      onComplete: () => {
+        setOpen(false);
+        gsap.set(els, { clearProps: "all" });
+      },
+    });
+  }
+
   const go = (v) => {
     onView(v);
     setOpen(false);
   };
 
   return (
-    <aside className={"sidebar" + (open ? " sidebar-open" : "")}>
+    <aside className={"sidebar" + (open ? " sidebar-open" : "")} ref={root}>
       <div className="sidebar-brand">
         <Logo />
         <span className="wordmark">Docu<span>Mind</span></span>
@@ -19,9 +54,10 @@ export default function Sidebar({ view, onView, onLogout }) {
         <button
           type="button"
           className="burger"
+          ref={burger}
           aria-expanded={open}
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggle}
         >
           {open ? (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">

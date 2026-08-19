@@ -828,3 +828,21 @@ h1, h2 { margin: 0; letter-spacing: -0.02em; }
 
   .sidebar-open .nav-item { min-height: 46px; }
 }
+
+/* ---------- Profil & Publier bot : mobile ---------- */
+@media (max-width: 640px) {
+  /* la jauge n'a plus la place : le chiffre suffit */
+  .mini-row .gauge-track { display: none; }
+  .mini-value { width: 72px; }
+  .danger-hint { white-space: nowrap; }
+
+  /* Publier bot : les lignes respirent, les actions passent pleine largeur */
+  .pick-row { flex-wrap: wrap; }
+  .pick-row .pick-state { white-space: nowrap; }
+  .live-row { flex-wrap: wrap; }
+  .live-row .btn-sm { flex: 1 0 100%; min-height: 44px; }
+  .live-origin { min-width: 0; }
+  .snippet pre { overflow-x: auto; }
+  .tune-grid { grid-template-columns: minmax(0, 1fr); }
+  .where-row { grid-template-columns: minmax(0, 1fr); }
+}
