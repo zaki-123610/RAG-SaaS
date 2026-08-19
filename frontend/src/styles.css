@@ -97,7 +97,7 @@ h1, h2 { margin: 0; letter-spacing: -0.02em; }
 }
 
 /* shell + sidebar */
-.shell { min-height: 100vh; display: grid; grid-template-columns: 262px minmax(0, 1fr); overflow-x: hidden; }
+.shell { min-height: 100vh; display: grid; grid-template-columns: 262px minmax(0, 1fr); overflow-x: clip; }
 .sidebar {
   border-right: 1px solid var(--border-soft); padding: 24px 18px;
   display: flex; flex-direction: column; gap: 28px;
@@ -138,7 +138,7 @@ h1, h2 { margin: 0; letter-spacing: -0.02em; }
 
 /* dashboard */
 .dash { padding: 30px 34px; display: flex; flex-direction: column; gap: 26px; }
-.dash, .publish, .docs { min-width: 0; max-width: 100%; overflow-x: hidden; }
+.dash, .publish, .docs { min-width: 0; max-width: 100%; overflow-x: clip; }
 .dash-head { display: flex; align-items: flex-start; gap: 20px; }
 .dash-head h1 { font-size: 23px; font-weight: 700; }
 .dash-head p { margin: 5px 0 0; font-size: 14px; color: var(--muted); }
