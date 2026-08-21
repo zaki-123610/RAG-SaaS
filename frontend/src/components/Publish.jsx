@@ -6,14 +6,16 @@ import { botColor, WIDGET_COLORS, WIDGET_DEFAULTS } from "../config";
 
 const STEPS = ["URL du site", "Choisir un bot", "Personnaliser", "Snippet prêt"];
 
-export default function Publish({ bots, onUnauthorized, onDocs }) {
+export default function Publish({ bots, onUnauthorized, onDocs, onRefresh }) {
   const [url, setUrl] = useState("");
   const [botId, setBotId] = useState("");
   const [color, setColor] = useState(WIDGET_DEFAULTS.color);
   const [position, setPosition] = useState(WIDGET_DEFAULTS.position);
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
-  const [live, setLive] = useState([]); // [{ id, origin }]
+  const live = bots
+    .filter((b) => b.is_public)
+    .map((b) => ({ id: b.id, origin: (b.allowed_origins || [])[0] || "" }));
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -70,7 +72,7 @@ export default function Publish({ bots, onUnauthorized, onDocs }) {
   async function stop(id) {
     try {
       await api.publishBot(id, false, []);
-      setLive((l) => l.filter((x) => x.id !== id));
+      await onRefresh();
     } catch (e) {
       if (e.status === 401) return onUnauthorized();
       setError("Impossible de retirer ce bot.");
@@ -83,10 +85,7 @@ export default function Publish({ bots, onUnauthorized, onDocs }) {
     setError("");
     try {
       await api.publishBot(botId, isPublic, origin ? [origin] : []);
-      setLive((l) => {
-        const rest = l.filter((x) => x.id !== botId);
-        return isPublic ? [...rest, { id: botId, origin }] : rest;
-      });
+      await onRefresh();
     } catch (e) {
       if (e.status === 401) return onUnauthorized();
       setError("Publication impossible — vérifiez que le bot vous appartient.");

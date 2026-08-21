@@ -106,7 +106,7 @@ export default function App() {
       onLogout={logout}
       onUnauthorized={logout}
       profile={<Profile user={user} bots={bots} onDeleteBot={removeBot} />}
-      publish={<Publish bots={bots} onUnauthorized={logout} onDocs={() => setView("docs")} />}
+      publish={<Publish bots={bots} onUnauthorized={logout} onDocs={() => setView("docs")} onRefresh={refreshBots} />}
       docs={<Docs onPublish={() => setView("publish")} />}
     />
   );

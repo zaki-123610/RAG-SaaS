@@ -19,16 +19,25 @@ def list_bots(user_id: int) -> list[dict]:
     with pool.connection() as conn:
         rows = conn.execute(
             """
-            SELECT b.id, b.name, COUNT(c.id)
+            SELECT b.id, b.name, COUNT(c.id), b.is_public, b.allowed_origins
             FROM bots b
             LEFT JOIN chunks c ON c.bot_id = b.id
             WHERE b.user_id = %s
-            GROUP BY b.id, b.name, b.created_at
+            GROUP BY b.id, b.name, b.created_at, b.is_public, b.allowed_origins
             ORDER BY b.created_at DESC
             """,
             (user_id,),
         ).fetchall()
-    return [{"id": r[0], "name": r[1], "chunks": r[2]} for r in rows]
+    return [
+        {
+            "id": r[0],
+            "name": r[1],
+            "chunks": r[2],
+            "is_public": r[3],
+            "allowed_origins": r[4] or [],
+        }
+        for r in rows
+    ]
 
 
 def user_owns_bot(user_id: int, bot_id: str) -> bool:
