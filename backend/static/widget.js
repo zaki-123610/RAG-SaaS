@@ -20,9 +20,9 @@
   const API = (function () {
     try { return new URL(script.src).origin; } catch { return ""; }
   })();
-  const COLOR = script.getAttribute("data-color") || "#ec3013";
+  const COLOR = script.getAttribute("data-color") || "#CD1C18";
   const POSITION = script.getAttribute("data-position") || "bottom-right";
-  const TITLE = script.getAttribute("data-title") || "Support";
+  const TITLE = script.getAttribute("data-title") || "Assistant";
   const HEADLINE = script.getAttribute("data-headline") || "Comment pouvons-nous aider ?";
   const SUBTITLE = script.getAttribute("data-subtitle") || "Réponse moyenne en moins d'une minute.";
   const GREETING = script.getAttribute("data-greeting") || "Bonjour 👋 Posez votre question, je réponds tout de suite.";
