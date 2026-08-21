@@ -41,7 +41,7 @@
 
   const host = document.createElement("div");
   host.style.cssText =
-    "position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:2147483647";
+    "position:fixed;top:0;left:0;width:0;height:0;pointer-events:none;z-index:2147483647";
   document.body.appendChild(host);
   const root = host.attachShadow({ mode: "open" });
 
@@ -57,10 +57,10 @@
     "<style>",
     ":host { --c: " + COLOR + "; }",
     "* { box-sizing:border-box; margin:0; font-family:'Archivo',system-ui,sans-serif; }",
-    ".wrap { position:absolute; inset:0; pointer-events:none; }",
+    ".wrap { pointer-events:none; }",
 
     /* ---- bulle ---- */
-    ".bubble { position:absolute; bottom:24px; " + side + "; width:60px; height:60px; border-radius:50%;" +
+    ".bubble { position:fixed; bottom:24px; " + side + "; width:60px; height:60px; border-radius:50%;" +
       " background:var(--c); color:#fff; border:2px solid #201e1d; cursor:pointer; pointer-events:auto;" +
       " display:grid; place-items:center; box-shadow:0 12px 26px rgba(32,30,29,.22);" +
       " transition:transform .14s ease, box-shadow .14s ease; }",
@@ -83,7 +83,7 @@
     ".open .bubble .ic { display:none; }",
 
     /* ---- panneau ---- */
-    ".panel { position:absolute; bottom:100px; " + side + "; width:372px; height:min(560px, calc(100vh - 148px));" +
+    ".panel { position:fixed; bottom:100px; " + side + "; width:372px; height:min(560px, calc(100vh - 148px));" +
       " display:none; flex-direction:column; background:#fff; overflow:hidden; pointer-events:auto;" +
       " box-shadow:0 22px 48px rgba(32,30,29,.22); opacity:0; transform:translateY(10px); border-radius:16px; }",
     ".open .panel { display:flex; animation:in .18s ease forwards; }",
