@@ -1,4 +1,5 @@
 # DocuMind (RAG-SaaS)
+![tests](https://github.com/zaki-123610/RAG-SaaS/actions/workflows/tests.yml/badge.svg)
 **[Démo](https://rag-saa-s-theta.vercel.app)** · **[API](https://rag-saas-mdmd.onrender.com/docs)**
 
 > Le backend tourne sur le plan gratuit Render : le premier appel
