@@ -14,7 +14,7 @@
   const script =
     document.currentScript ||
     document.querySelector("script[data-bot-id]");
-  if (!script) return console.error("[widget] script introuvable");
+  if (!script) return console.error("[widget] script not found");
 
   const BOT_ID = script.getAttribute("data-bot-id");
   const API = (function () {
@@ -23,13 +23,13 @@
   const COLOR = script.getAttribute("data-color") || "#CD1C18";
   const POSITION = script.getAttribute("data-position") || "bottom-right";
   const TITLE = script.getAttribute("data-title") || "Assistant";
-  const HEADLINE = script.getAttribute("data-headline") || "Comment pouvons-nous aider ?";
-  const SUBTITLE = script.getAttribute("data-subtitle") || "Réponse moyenne en moins d'une minute.";
-  const GREETING = script.getAttribute("data-greeting") || "Bonjour 👋 Posez votre question, je réponds tout de suite.";
-  const STATUS = script.getAttribute("data-status") || "En ligne maintenant";
+  const HEADLINE = script.getAttribute("data-headline") || "How can we help?";
+  const SUBTITLE = script.getAttribute("data-subtitle") || "Average response in under a minute.";
+  const GREETING = script.getAttribute("data-greeting") || "Hello 👋 Ask your question, I'll answer right away.";
+  const STATUS = script.getAttribute("data-status") || "Online now";
   const DEMO = script.getAttribute("data-demo") === "true";
 
-  if (!BOT_ID && !DEMO) return console.error("[widget] data-bot-id manquant");
+  if (!BOT_ID && !DEMO) return console.error("[widget] missing data-bot-id");
 
   if (!document.getElementById("cw-font")) {
     const l = document.createElement("link");
@@ -59,7 +59,7 @@
     "* { box-sizing:border-box; margin:0; font-family:'Archivo',system-ui,sans-serif; }",
     ".wrap { pointer-events:none; }",
 
-    /* ---- bulle ---- */
+    /* ---- bubble ---- */
     ".bubble { position:fixed; bottom:24px; " + side + "; width:60px; height:60px; border-radius:50%;" +
       " background:var(--c); color:#fff; border:2px solid #201e1d; cursor:pointer; pointer-events:auto;" +
       " display:grid; place-items:center; box-shadow:0 12px 26px rgba(32,30,29,.22);" +
@@ -82,7 +82,7 @@
     ".open .bubble .x { display:block; }",
     ".open .bubble .ic { display:none; }",
 
-    /* ---- panneau ---- */
+    /* ---- panel ---- */
     ".panel { position:fixed; bottom:100px; " + side + "; width:372px; height:min(560px, calc(100vh - 148px));" +
       " display:none; flex-direction:column; background:#fff; overflow:hidden; pointer-events:auto;" +
       " box-shadow:0 22px 48px rgba(32,30,29,.22); opacity:0; transform:translateY(10px); border-radius:16px; }",
@@ -96,7 +96,7 @@
     ".head::before, .head::after { animation:none; }",
     "@keyframes rise { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }",
 
-    /* ---- bandeau ---- */
+    /* ---- header ---- */
     ".head { flex:none; background:var(--c); color:#fff; padding:22px 20px 18px; position:relative; overflow:hidden;" +
       " border-radius:16px 16px 0 0; }",
     ".head::before { content:''; position:absolute; top:-64px; right:-38px; width:180px; height:180px; border-radius:50%;" +
@@ -119,7 +119,7 @@
     ".tool:focus-visible { outline:2px solid #fff; outline-offset:2px; }",
     ".tool svg { width:16px; height:16px; }",
 
-    /* ---- fil ---- */
+    /* ---- thread ---- */
     ".thread { flex:1; overflow-y:auto; padding:18px 20px; background:#f3f2f2; display:flex; flex-direction:column; gap:12px; }",
     ".thread::-webkit-scrollbar { width:8px; }",
     ".thread::-webkit-scrollbar-thumb { background:#cfcbc9; }",
@@ -134,7 +134,7 @@
     ".dots i:nth-child(2) { animation-delay:.15s } .dots i:nth-child(3) { animation-delay:.3s }",
     "@keyframes bl { 0%,100%{ opacity:.28; transform:translateY(0) } 50%{ opacity:1; transform:translateY(-3px) } }",
 
-    /* ---- saisie ---- */
+    /* ---- input bar ---- */
     ".bar { flex:none; display:flex; gap:10px; padding:12px; background:#fff; border-top:1px solid #d9d5d3; }",
     ".bar input { flex:1; min-width:0; padding:11px 13px; border:1px solid transparent; background:#f3f2f2;" +
       " border-radius:0; font-size:14px; color:#201e1d; outline:none; }",
@@ -152,7 +152,7 @@
     ".foot { flex:none; padding:8px 14px 10px; background:#fff; font-size:10px; letter-spacing:.1em;" +
       " text-transform:uppercase; color:#6b6664; }",
 
-    /* ---- mobile : ne couvre pas tout l'écran ---- */
+    /* ---- mobile ---- */
     "@media (max-width:520px) {",
     "  .panel { " + sideM + "; width:calc(100vw - 24px); max-width:400px; height:min(62vh, 460px); bottom:84px;" +
       " box-shadow:0 16px 36px rgba(32,30,29,.28); }",
@@ -173,18 +173,18 @@
     '    <div class="sub">' + esc(SUBTITLE) + "</div>",
     '    <div class="status"><i></i>' + esc(STATUS) + "</div>",
     '    <div class="tools">',
-    '      <button class="tool reset" aria-label="Nouvelle conversation">' + ICON_CLOCK + "</button>",
-    '      <button class="tool close" aria-label="Fermer">' + ICON_X + "</button>",
+    '      <button class="tool reset" aria-label="New conversation">' + ICON_CLOCK + "</button>",
+    '      <button class="tool close" aria-label="Close">' + ICON_X + "</button>",
     "    </div>",
     "  </div>",
     '  <div class="thread"></div>',
     '  <div class="bar">',
-    '    <input placeholder="Écrire un message…" aria-label="Votre question" />',
-    '    <button aria-label="Envoyer"><span class="txt">Envoyer</span>' + ICON_SEND + "</button>",
+    '    <input placeholder="Type a message…" aria-label="Your question" />',
+    '    <button aria-label="Send"><span class="txt">Send</span>' + ICON_SEND + "</button>",
     "  </div>",
-    '  <div class="foot">Propulsé par votre assistant</div>',
+    '  <div class="foot">Powered by your assistant</div>',
     "</div>",
-    '<button class="bubble" aria-label="Ouvrir le chat">',
+    '<button class="bubble" aria-label="Open chat">',
     '  <span class="ic">' + ICON_STAR + "</span>",
     '  <span class="x">' + ICON_X + "</span>",
     "</button>",
@@ -201,7 +201,7 @@
   function toggle(force) {
     const open = force !== undefined ? force : !wrap.classList.contains("open");
     wrap.classList.toggle("open", open);
-    bubble.setAttribute("aria-label", open ? "Fermer le chat" : "Ouvrir le chat");
+    bubble.setAttribute("aria-label", open ? "Close chat" : "Open chat");
     if (open) { greet(); setTimeout(() => input.focus(), 60); }
   }
   bubble.onclick = () => toggle();
@@ -250,7 +250,7 @@
     try {
       if (DEMO) {
         await new Promise((r) => setTimeout(r, 900));
-        answer = "Voici une réponse de démonstration à : « " + q + " ».\nBranchez data-bot-id pour les vraies réponses.";
+        answer = "Here is a demo response to: “ " + q + " ”.\nConnect data-bot-id for real answers.";
       } else {
         const res = await fetch(API + "/public/query", {
           method: "POST",
@@ -258,10 +258,10 @@
           body: JSON.stringify({ bot_id: BOT_ID, question: q }),
         });
         const data = await res.json();
-        answer = res.ok ? data.answer : data.detail || "Erreur";
+        answer = res.ok ? data.answer : data.detail || "Error";
       }
     } catch {
-      answer = "Connexion impossible.";
+      answer = "Connection failed.";
     }
     typing.remove();
     add("a", answer);
