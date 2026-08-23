@@ -7,8 +7,14 @@ from pgvector.psycopg import register_vector
 load_dotenv()
 
 def _configure(conn):
-    """Execute une fois a l ouverture de chaque connexion physique."""
-    register_vector(conn)
+    """Execute a l ouverture de chaque connexion physique.
+    Tolere l absence de l extension vector : elle est creee par init_db(),
+    qui peut tourner apres l ouverture du pool (cas d une base neuve en CI).
+    """
+    try:
+        register_vector(conn)
+    except Exception:
+        pass
 
 pool = ConnectionPool(
     conninfo=os.getenv("DATABASE_URL"),
