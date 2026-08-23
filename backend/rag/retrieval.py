@@ -1,18 +1,16 @@
 import numpy as np
-from pgvector.psycopg import register_vector
 
 from db.connection import pool
 from rag.embeddings import embed
-
+from langfuse import observe
 TOP_K = 3
 
-
+@observe(name="pgvector-search")
 def search(question: str, bot_id: str, top_k: int = TOP_K) -> list[str]:
     """Retourne les chunks les plus proches de la question."""
     vecteur = np.array(embed([question], is_query=True)[0])
 
     with pool.connection() as conn:
-        register_vector(conn)
         rows = conn.execute(
             """
             SELECT content

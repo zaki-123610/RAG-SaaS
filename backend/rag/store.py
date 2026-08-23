@@ -1,4 +1,4 @@
-from pgvector.psycopg import register_vector
+
 
 from db.connection import pool
 from rag.chunking import split_pdf
@@ -16,7 +16,6 @@ def index_document(path: str, bot_id: str, filename: str = "document.pdf") -> in
         return 0
 
     with pool.connection() as conn:
-        register_vector(conn)
 
         doc_id = conn.execute(
             "INSERT INTO documents (bot_id, filename, chunks) VALUES (%s, %s, %s) RETURNING id",

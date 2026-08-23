@@ -1,5 +1,5 @@
 import os
-
+from langfuse import observe
 import requests
 from dotenv import load_dotenv
 
@@ -9,7 +9,7 @@ JINA_URL = "https://api.jina.ai/v1/embeddings"
 MODEL = "jina-embeddings-v3"
 DIMENSION = 1024
 
-
+@observe(name="jina-embed")
 def embed(textes: list[str], is_query: bool = False) -> list[list[float]]:
     """Transforme une liste de textes en vecteurs via l API Jina."""
     reponse = requests.post(

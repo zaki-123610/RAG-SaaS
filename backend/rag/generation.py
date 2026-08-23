@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from groq import Groq
-
+from langfuse import observe
 from rag.retrieval import search
 
 load_dotenv()
@@ -21,7 +21,7 @@ SYSTEM_PROMPT = (
 
 groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-
+@observe(name="rag-query")
 def answer(question: str, bot_id: str) -> str:
     """Question -> chunks pertinents -> reponse redigee par le LLM."""
     chunks = search(question, bot_id)
