@@ -25,6 +25,21 @@ document technique en anglais — test cross-lingual.
 Chaque changement de chunking ou de modèle est validé par `eval/run_eval.py`
 avant d'être déployé.
 
+## Performance
+
+Latence de `/query` mesurée via tracing Langfuse :
+
+| Étape        | Avant  | Après |
+|--------------|--------|-------|
+| Embedding    | 647 ms | 647 ms |
+| Recherche SQL| 2.15 s | 460 ms |
+| Génération   | 800 ms | 600 ms |
+| **Total**    | **3.6 s** | **1.7 s** |
+
+Le tracing a montré que le goulot était `register_vector()`, appelé à
+chaque recherche et coûtant un aller-retour réseau complet. Déplacé au
+niveau du pool de connexions.
+
 ## Stack technique
 
 **Backend**
