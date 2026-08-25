@@ -1,5 +1,9 @@
-from mcp.server.mcpserver import MCPServer
+import os
+import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from mcp.server.mcpserver import MCPServer
 from db.bots import list_bots
 from rag.retrieval import search
 from rag.generation import answer
