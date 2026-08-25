@@ -19,8 +19,11 @@ async def main():
             for t in tools.tools:
                 print(" -", t.name, ":", t.description)
 
-            result = await session.call_tool("ping", {})
-            print("\nping ->", result.content[0].text)
+            result = await session.call_tool(
+                "search_documents",
+                {"bot_id": "236d854fe6ae", "query": "modele ARMA"},
+            )
+            print("\nsearch_documents ->\n", result.content[0].text[:500])
 
 
 asyncio.run(main())
