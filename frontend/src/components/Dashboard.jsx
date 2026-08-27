@@ -113,7 +113,7 @@ export default function Dashboard({ bots, view, onView, onOpen, onCreate, onRemo
           ) : (
             <div className="bot-grid" ref={grid}>
               {bots.map((b, i) => (
-                <BotCard key={b.id} bot={b} index={i} onOpen={onOpen} onRemove={onRemove} />
+                <BotCard key={b.id} bot={b} index={i} onOpen={onOpen} />
               ))}
             </div>
           )}

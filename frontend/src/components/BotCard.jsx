@@ -1,6 +1,6 @@
 import { MEMORY_CAP, botColor, memPct } from "../config";
 
-export default function BotCard({ bot, index, onOpen, onRemove }) {
+export default function BotCard({ bot, index, onOpen }) {
   const c = botColor(index);
   const pct = memPct(bot.chunks);
   const active = bot.chunks > 0;
@@ -14,19 +14,16 @@ export default function BotCard({ bot, index, onOpen, onRemove }) {
 
         <div className="bot-id">
           <span className="bot-name">{bot.name}</span>
-          <span className="bot-mem">{bot.chunks} AI Memory</span>
-          <span className={active ? "bot-state is-active" : "bot-state"}>{active ? "Actif" : "Vide"}</span>
+          <span className="bot-mem">
+            <span className="bot-mem-label">AI Memory</span>
+            <span className="bot-mem-value">{bot.chunks}/{MEMORY_CAP}</span>
+          </span>
         </div>
-
-        {onRemove && (
-          <button type="button" className="btn-remove" onClick={() => onRemove(bot.id)}>Supprimer</button>
-        )}
       </div>
 
       <div className="bot-card-foot">
-        <span className="bot-foot-id">
-          <span className="bot-foot-label">Mémoire</span>
-          <span className="bot-foot-value">{bot.chunks}/{MEMORY_CAP}</span>
+        <span className={active ? "bot-state is-active" : "bot-state"}>
+          {active ? "Actif" : "Vide"}
         </span>
         <button className="dm-btn" onClick={() => onOpen(bot.id)}>Discuter</button>
       </div>
