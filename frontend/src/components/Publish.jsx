@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import * as api from "../api";
-import BotIcon from "./BotIcon";
 import { botColor, WIDGET_COLORS, WIDGET_DEFAULTS } from "../config";
 
 const STEPS = ["URL du site", "Choisir un bot", "Personnaliser", "Snippet prêt"];
@@ -183,9 +182,7 @@ export default function Publish({ bots, onUnauthorized, onDocs, onRefresh }) {
                   }}
                   onClick={() => pick(b.id)}
                 >
-                  <span className="bot-avatar" style={{ background: c.tint, color: c.color }}>
-                    <BotIcon size={17} />
-                  </span>
+                  <span className="bot-dot" style={{ background: c.color }} />
                   <span className="pick-id">
                     <span className="bot-name">{b.name}</span>
                     <span className="muted-12">{b.chunks} AI Memory</span>
@@ -227,15 +224,7 @@ export default function Publish({ bots, onUnauthorized, onDocs, onRefresh }) {
           >
             {picked ? (
               <>
-                <span
-                  className="bot-avatar"
-                  style={{
-                    background: botColor(bots.indexOf(picked)).tint,
-                    color: botColor(bots.indexOf(picked)).color,
-                  }}
-                >
-                  <BotIcon size={20} />
-                </span>
+                <span className="bot-dot" style={{ background: botColor(bots.indexOf(picked)).color }} />
                 <strong>{picked.name}</strong>
                 <span className="ready">Prêt à publier</span>
               </>
@@ -388,9 +377,7 @@ export default function Publish({ bots, onUnauthorized, onDocs, onRefresh }) {
             const c = botColor(i < 0 ? 0 : i);
             return (
               <div className="live-row" key={entry.id}>
-                <span className="bot-avatar" style={{ background: c.tint, color: c.color }}>
-                  <BotIcon size={17} />
-                </span>
+                <span className="bot-dot" style={{ background: c.color }} />
                 <span className="live-id">
                   <span className="live-name">
                     {bot.name}

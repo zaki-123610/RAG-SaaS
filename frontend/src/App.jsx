@@ -103,6 +103,7 @@ export default function App() {
       onView={setView}
       onOpen={setBotId}
       onCreate={createBot}
+      onRemove={removeBot}
       onLogout={logout}
       onUnauthorized={logout}
       profile={<Profile user={user} bots={bots} onDeleteBot={removeBot} />}

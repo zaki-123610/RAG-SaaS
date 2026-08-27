@@ -3,7 +3,7 @@ import gsap from "gsap";
 import Sidebar from "./Sidebar";
 import BotCard from "./BotCard";
 
-export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogout, onUnauthorized, profile, publish, docs }) {
+export default function Dashboard({ bots, view, onView, onOpen, onCreate, onRemove, onLogout, onUnauthorized, profile, publish, docs }) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -39,12 +39,9 @@ export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogo
       { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(1.4)", clearProps: "transform,opacity" }
     );
 
-    // jauges de memoire : remplissage anime depuis la gauche
     nouvelles.forEach((card) => {
-      const fill = card.querySelector(".gauge-fill");
-      if (!fill) return;
-      const cible = fill.style.width;
-      gsap.fromTo(fill, { width: "0%" }, { width: cible, duration: 0.6, delay: 0.2, ease: "power2.out" });
+      const ring = card.querySelector(".bot-ring");
+      if (ring) gsap.from(ring, { rotate: -170, scale: 0.6, duration: 0.75, ease: "power4.out", clearProps: "transform" });
     });
   }, [bots.length]);
 
@@ -114,9 +111,9 @@ export default function Dashboard({ bots, view, onView, onOpen, onCreate, onLogo
               <span>Donnez un nom à votre premier bot ci-dessus, puis uploadez un PDF pour l'entraîner.</span>
             </div>
           ) : (
-            <div className="bot-list" ref={grid}>
+            <div className="bot-grid" ref={grid}>
               {bots.map((b, i) => (
-                <BotCard key={b.id} bot={b} index={i} onOpen={onOpen} />
+                <BotCard key={b.id} bot={b} index={i} onOpen={onOpen} onRemove={onRemove} />
               ))}
             </div>
           )}

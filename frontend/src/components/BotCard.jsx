@@ -1,45 +1,35 @@
-import BotIcon from "./BotIcon";
 import { MEMORY_CAP, botColor, memPct } from "../config";
 
-export default function BotCard({ bot, index, onOpen }) {
+export default function BotCard({ bot, index, onOpen, onRemove }) {
   const c = botColor(index);
+  const pct = memPct(bot.chunks);
+  const active = bot.chunks > 0;
 
   return (
-    <article className="bot-row">
-      <span className="bot-avatar" style={{ background: c.tint, color: c.color }}>
-        <BotIcon />
-      </span>
-
-      <div className="bot-id">
-        <span className="bot-name">{bot.name}</span>
-        <span className="bot-sub">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <ellipse cx="12" cy="5" rx="8" ry="3" />
-            <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
-            <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
-          </svg>
-          {bot.chunks} AI Memory
-          <span className="dot-sep" />
-          {bot.chunks > 0 ? "Actif" : "Vide"}
+    <article className="bot-card">
+      <div className="bot-card-top">
+        <span className="bot-ring" style={{ background: `conic-gradient(${c.color} ${pct * 3.6}deg, #241d1f 0)` }}>
+          <span className="bot-ring-in">{pct}%</span>
         </span>
+
+        <div className="bot-id">
+          <span className="bot-name">{bot.name}</span>
+          <span className="bot-mem">{bot.chunks} AI Memory</span>
+          <span className={active ? "bot-state is-active" : "bot-state"}>{active ? "Actif" : "Vide"}</span>
+        </div>
+
+        {onRemove && (
+          <button type="button" className="btn-remove" onClick={() => onRemove(bot.id)}>Supprimer</button>
+        )}
       </div>
 
-      <div className="bot-gauge">
-        <span className="gauge-head">
-          Mémoire
-          <span>{bot.chunks}/{MEMORY_CAP}</span>
+      <div className="bot-card-foot">
+        <span className="bot-foot-id">
+          <span className="bot-foot-label">Mémoire</span>
+          <span className="bot-foot-value">{bot.chunks}/{MEMORY_CAP}</span>
         </span>
-        <span className="gauge-track">
-          <span className="gauge-fill" style={{ width: memPct(bot.chunks) + "%", background: c.color }} />
-        </span>
+        <button className="dm-btn" onClick={() => onOpen(bot.id)}>Discuter</button>
       </div>
-
-      <button className="btn-ghost" onClick={() => onOpen(bot.id)}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        Discuter
-      </button>
     </article>
   );
 }

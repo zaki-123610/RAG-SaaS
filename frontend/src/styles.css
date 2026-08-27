@@ -1188,3 +1188,91 @@ code { overflow-wrap: anywhere; }
   .stat .stat-num { font-size: 30px; }
   .bot-row .dm-btn, .composer .dm-fly { width: 100%; }
 }
+
+/* ================= mise à jour du déploiement ================= */
+/* 1. panneaux plus transparents : le fond rouge reste visible */
+.sidebar { background: rgba(15, 11, 12, 0.7); }
+.dash, .publish, .docs { background: rgba(11, 8, 9, 0.62); }
+.card, .bot-card, .bot-row, .stat, .account, .conv, .doc-list { background: rgba(21, 18, 19, 0.8); }
+
+/* 2. tous les boutons d'action de la dashboard prennent le style pilule */
+.dash .btn-primary, .dash .btn-ghost,
+.publish .btn-primary, .publish .btn-ghost,
+.docs .btn-primary,
+.conv .btn-ghost, .composer .btn-primary,
+.dm-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 1.15em 2.6em;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 2.5px;
+  color: #fff; background: #cd1c18;
+  border: 0; border-radius: 45px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.28);
+  transition: all 0.3s ease 0s; cursor: pointer; outline: none;
+}
+.dash .btn-primary:hover, .dash .btn-ghost:hover,
+.publish .btn-primary:hover, .publish .btn-ghost:hover,
+.docs .btn-primary:hover,
+.conv .btn-ghost:hover, .composer .btn-primary:hover,
+.dm-btn:hover {
+  color: #fff; background: #e2564f;
+  transform: translateY(-7px);
+  box-shadow: 0 15px 24px rgba(0, 0, 0, 0.38);
+}
+.dm-btn:active, .dash .btn-primary:active, .publish .btn-primary:active { transform: translateY(-1px); }
+.dm-btn:disabled, .dash .btn-primary:disabled, .publish .btn-primary:disabled, .composer .btn-primary:disabled {
+  opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none;
+}
+/* les boutons Copier / Retirer des bots en ligne restent inchangés */
+.live-row .btn-sm, .snippet .btn-sm, .copy-btn { text-transform: none; letter-spacing: normal; }
+
+/* 3. tuiles de bots : anneau de mémoire */
+.bot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
+.bot-card {
+  border: 1px solid rgba(244, 236, 235, 0.05);
+  border-radius: 22px;
+  box-shadow: 12px 12px 28px rgba(0, 0, 0, 0.55), -6px -6px 18px rgba(244, 236, 235, 0.022);
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.bot-card-top { display: flex; align-items: flex-start; gap: 18px; }
+.bot-ring {
+  width: 78px; height: 78px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+}
+.bot-ring-in {
+  width: 60px; height: 60px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  background: #131011;
+  box-shadow: inset 6px 6px 13px rgba(0, 0, 0, 0.6), inset -4px -4px 10px rgba(244, 236, 235, 0.02);
+}
+.bot-card .bot-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.bot-card .bot-name { font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bot-mem { font-size: 12.5px; color: var(--muted-2); }
+.bot-state {
+  align-self: flex-start; padding: 6px 13px; border-radius: 99px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); background: rgba(244, 236, 235, 0.06);
+}
+.bot-state.is-active { color: #7de2c3; background: rgba(16, 185, 129, 0.14); }
+.bot-card-foot {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 16px;
+  background: #131011;
+  box-shadow: inset 6px 6px 13px rgba(0, 0, 0, 0.6), inset -4px -4px 10px rgba(244, 236, 235, 0.02);
+}
+.bot-foot-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.bot-foot-label { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #7a6a69; }
+.bot-foot-value { font-size: 14px; font-weight: 700; }
+.bot-card-foot .dm-btn { flex: none; padding: 0.95em 1.7em; }
+
+/* 4. Publier bot : pastille à la place de l'icône */
+.bot-dot { width: 10px; height: 10px; flex: none; border-radius: 50%; }
+.bot-dot-lg { width: 14px; height: 14px; }
+
+@media (max-width: 640px) {
+  .bot-grid { grid-template-columns: minmax(0, 1fr); }
+  .bot-card-foot { flex-direction: column; align-items: stretch; }
+}
