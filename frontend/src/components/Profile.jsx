@@ -1,4 +1,3 @@
-import BotIcon from "./BotIcon";
 import { botColor, memPct } from "../config";
 
 export default function Profile({ user, bots, onDeleteBot }) {
@@ -15,12 +14,7 @@ export default function Profile({ user, bots, onDeleteBot }) {
           <span className="account-mail">{user.email}</span>
           <span className="muted-13">Adresse email principale du compte</span>
           <span className="account-tags">
-            <span className="tag-pro">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-              Compte vérifié
-            </span>
+            <span className="tag-pro">Compte vérifié</span>
             <span className="muted-12">ID #{user.id}</span>
           </span>
         </div>
@@ -28,38 +22,17 @@ export default function Profile({ user, bots, onDeleteBot }) {
 
       <div className="stat-grid">
         <section className="card stat">
-          <span className="stat-top">
-            Total chatbots
-            <span className="stat-badge red">
-              <BotIcon size={16} />
-            </span>
-          </span>
+          <span className="stat-label">Total chatbots</span>
           <span className="stat-num">{bots.length}</span>
         </section>
 
         <section className="card stat">
-          <span className="stat-top">
-            AI Memory totale
-            <span className="stat-badge violet">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <ellipse cx="12" cy="5" rx="8" ry="3" />
-                <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
-                <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
-              </svg>
-            </span>
-          </span>
+          <span className="stat-label">AI Memory totale</span>
           <span className="stat-num">{memory}<small>u</small></span>
         </section>
 
         <section className="card stat">
-          <span className="stat-top">
-            Moyenne par bot
-            <span className="stat-badge cyan">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </span>
-          </span>
+          <span className="stat-label">Moyenne par bot</span>
           <span className="stat-num">{average}<small>AI Mem.</small></span>
         </section>
       </div>
@@ -73,26 +46,13 @@ export default function Profile({ user, bots, onDeleteBot }) {
             const c = botColor(i);
             return (
               <div className="mini-row" key={b.id}>
-                <span className="mini-avatar" style={{ background: c.tint, color: c.color }}>
-                  <BotIcon size={17} />
-                </span>
+                <span className="mini-dot" style={{ background: c.color }} />
                 <span className="mini-name">{b.name}</span>
                 <span className="gauge-track mini-track">
                   <span className="gauge-fill" style={{ width: memPct(b.chunks) + "%", background: c.color }} />
                 </span>
                 <span className="mini-value">{b.chunks} AI Mem.</span>
-                <button
-                  type="button"
-                  className="icon-danger"
-                  title={"Supprimer " + b.name}
-                  aria-label={"Supprimer " + b.name}
-                  onClick={() => onDeleteBot(b.id)}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 6h18" /><path d="M8 6V4h8v2" />
-                    <path d="M6 6l1 14h10l1-14" /><path d="M10 11v6" /><path d="M14 11v6" />
-                  </svg>
-                </button>
+                <button type="button" className="btn-remove" onClick={() => onDeleteBot(b.id)}>Supprimer</button>
               </div>
             );
           })

@@ -81,7 +81,7 @@ export default function Login({ onSubmit, mode: initialMode = "login" }) {
 
         {error && <p className="error">{error}</p>}
 
-        <button className="btn-primary block" type="submit" disabled={busy}>
+        <button className="dm-btn block" type="submit" disabled={busy}>
           {busy ? "…" : isLogin ? "Se connecter" : "Créer mon compte"}
         </button>
 
