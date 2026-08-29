@@ -13,17 +13,36 @@ Plateforme SaaS multi-tenant de Retrieval-Augmented Generation : chaque utilisat
 Hit rate mesuré sur un golden set de 16 questions (français) contre un
 document technique en anglais — test cross-lingual.
 
-| Itération                              | Hit rate |
-|----------------------------------------|----------|
-| Baseline                               | 75.0 %   |
-| Labels du golden set corrigés          | 81.2 %   |
-| Nettoyage des symboles mathématiques   | 93.8 %   |
-| Passage aux embeddings API             | 87.5 %   |  
-|  (Jina, via ChromaDB)                  |          |
-| Migration pgvector + task query/passage| 93.8 %   |
+| Itération                              |     Hit rate    |
+|----------------------------------------|-----------------|
+| Baseline                               |     75.0 %      |
+| Labels du golden set corrigés          |     81.2 %      |
+| Nettoyage des symboles mathématiques   |     93.8 %      |
+| Passage aux embeddings API (Jina, via ChromaDB) | 87.5 % |
+| Migration pgvector + task query/passage|     93.8 %      |
 
 Chaque changement de chunking ou de modèle est validé par `eval/run_eval.py`
 avant d'être déployé.
+
+La baisse à 87.5 % est le coût du passage à une API d'embedding, imposé par la contrainte mémoire de Render. Le gain final vient du paramètre task de Jina, qui distingue documents et requêtes.
+
+## Pipeline agentique (Corrective RAG)
+
+Un second pipeline construit avec LangGraph ajoute un nœud d'évaluation
+des chunks : si les passages récupérés ne répondent pas à la question,
+la requête est reformulée et la recherche relancée (2 tentatives max).
+
+
+| Configuration      | Hit rate | Appels LLM / question |
+|--------------------|----------|-----------------------|
+| RAG simple, top-3  | 100 %    | 1                     |
+| CRAG, top-3        | 100 %    | ~2.1                  |
+| RAG simple, top-1  | 81.2 %   | 1                     |
+| CRAG, top-1        | 100 %    | ~2.6                  |
+
+Le CRAG rattrape intégralement les échecs de recherche en conditions
+dégradées, mais n'apporte rien quand le retrieval est déjà bon — pour
+un coût doublé. **Le pipeline simple reste en production.**
 
 ## Performance
 
@@ -75,13 +94,18 @@ RAG-SaaS/
 │   │   ├── security.py               # Hashing bcrypt, JWT, get_current_user
 │   │   └── limiter.py                # Rate limiting (slowapi) sur auth, upload, query et public query
 │   │
+│   ├── agent/                        # Pipeline Corrective RAG (LangGraph)
+│   │   ├── state.py                  # AgentState : question, query réécrite, chunks, tentatives, verdict, réponse
+│   │   ├── nodes.py                  # Noeuds retrieve / grade / rewrite / generate / give_up (LLM Groq)
+│   │   └── graph.py                  # Assemblage du graphe + boucle grade→rewrite→retrieve, answer_crag()
+│   │
 │   ├── db/                           # Accès base de données
 │   │   ├── connection.py             # Pool de connexion + init_db()
 │   │   ├── schema.sql                # Schéma SQL (users, bots, documents, chunks, public_queries + extension pgvector)
 │   │   ├── users.py                  # Requêtes users
 │   │   └── bots.py                   # Requêtes bots (dont user_owns_bot, set_public, get_public_bot, count_queries_today)
 │   │
-│   ├── rag/                          # Pipeline RAG
+│   ├── rag/                          # Pipeline RAG (retrieval simple, utilisé par /query et par agent/)
 │   │   ├── chunking.py               # Extraction PDF + découpage en chunks
 │   │   ├── embeddings.py             # Appel Jina AI, vecteurs 1024 dimensions
 │   │   ├── retrieval.py              # Récupération des chunks pertinents (pgvector, top_k)
@@ -89,11 +113,21 @@ RAG-SaaS/
 │   │   ├── store.py                  # Indexation Postgres/pgvector, index_document(), list_documents(), delete_document()
 │   │   └── legacy_store_chromadb.py / legacy_retrieval_chromadb.py  # Anciennes versions (ChromaDB, avant migration pgvector), gardées à titre de référence
 │   │
+│   ├── mcp_server/                   # Serveur MCP exposant le RAG comme outils pour Claude Desktop
+│   │   ├── server.py                 # Outils list_my_bots / search_documents / ...
+│   │   └── test_client.py            # Client de test du serveur MCP
+│   │
 │   ├── eval/                         # Évaluation du pipeline RAG
 │   │   ├── golden_set.py             # Jeu de questions/réponses de référence
-│   │   ├── run_eval.py               # Hit-rate du retrieval en place (embeddings Jina, pgvector)
+│   │   ├── run_eval.py               # Hit-rate du retrieval simple (embeddings Jina, pgvector)
+│   │   ├── run_eval_crag.py          # Hit-rate du pipeline Corrective RAG (agent/graph.py)
 │   │   ├── sweep.py                  # Comparaison de tailles de chunk/overlap
 │   │   └── legacy_*_sentencetransformers.py  # Anciennes versions (autre modèle d'embedding, gardées à titre de référence)
+│   │
+│   ├── tests/                        # Tests automatisés (pytest)
+│   │   ├── conftest.py               # Fixtures (client de test, base de données)
+│   │   ├── test_auth.py              # Tests /auth/register, /auth/login
+│   │   └── test_bots.py              # Tests des routes /bots
 │   │
 │   ├── scripts/                      # Scripts d'exploration/expérimentation (non utilisés par l'app)
 │   │   ├── 01_embeddings.py … 05_retrieval.py
@@ -206,10 +240,11 @@ Le dossier [backend/eval/](backend/eval/) contient un jeu de données de référ
 
 ## Choix techniques
 
-**Pas de framework RAG (LangChain, LlamaIndex).** Chaque étape —
-chunking, embedding, retrieval, prompt — est écrite explicitement
-pour pouvoir être mesurée et débuggée isolément. Une chaîne LCEL
-donne une mauvaise réponse sans dire d'où vient le problème.
+**Pas de chaîne RAG toute faite.** Le pipeline principal — chunking,
+embedding, retrieval, prompt — est écrit explicitement pour pouvoir
+être mesuré et débuggé étape par étape. LangChain n'est utilisé que
+pour le text splitter, et LangGraph pour le pipeline agentique où
+la machine à états apporte un vrai gain (boucles, routage conditionnel).
 
 **Embeddings via API plutôt qu'en local.** `sentence-transformers`
 + PyTorch dépassaient les 512 Mo du plan gratuit Render (OOM au
