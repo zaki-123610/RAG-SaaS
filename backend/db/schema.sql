@@ -48,3 +48,5 @@ CREATE TABLE IF NOT EXISTS public_queries (
 
 CREATE INDEX IF NOT EXISTS idx_public_queries_bot_date
     ON public_queries(bot_id, created_at);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS chunk_limit INTEGER DEFAULT 500;

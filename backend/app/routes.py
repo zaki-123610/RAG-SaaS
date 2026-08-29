@@ -20,6 +20,9 @@ from rag.store import delete_document, index_document, list_documents
 from fastapi import Header
 from db.bots import count_queries_today, get_public_bot, log_query, set_public
 
+from db.users import get_usage
+
+
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
@@ -81,6 +84,13 @@ async def upload(
 ) -> dict:
     check_owner(user["id"], bot_id)
 
+
+    usage = get_usage(user["id"])
+    if usage["used"] >= usage["limit"]:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Quota atteint ({usage['used']}/{usage['limit']} morceaux). Supprimez des documents pour continuer.",
+        )
     if file.content_type != "application/pdf":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -158,6 +168,11 @@ async def publish_bot(
             detail="Ce bot n'existe pas ou ne vous appartient pas.",
         )
     return {"bot_id": bot_id, "is_public": body.is_public, "allowed_origins": body.allowed_origins}
+
+
+@router.get("/usage")
+async def usage(user: dict = Depends(get_current_user)) -> dict:
+    return get_usage(user["id"])
 
 @router.post("/query")
 @limiter.limit("30/minute")

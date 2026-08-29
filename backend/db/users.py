@@ -38,3 +38,21 @@ def get_user_by_id(user_id: int) -> dict | None:
     if not row:
         return None
     return {"id": row[0], "email": row[1]}
+
+def get_usage(user_id: int) -> dict:
+    """Retourne le nombre de chunks utilises et la limite du user."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            """
+            SELECT u.chunk_limit, COALESCE(COUNT(c.id), 0)
+            FROM users u
+            LEFT JOIN bots b ON b.user_id = u.id
+            LEFT JOIN chunks c ON c.bot_id = b.id
+            WHERE u.id = %s
+            GROUP BY u.id, u.chunk_limit
+            """,
+            (user_id,),
+        ).fetchone()
+    if not row:
+        return {"limit": 0, "used": 0}
+    return {"limit": row[0], "used": row[1]}
