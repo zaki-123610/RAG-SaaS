@@ -1,5 +1,3 @@
-export const MEMORY_CAP = 200;
-
 export const BOT_COLORS = [
   { color: "#CD1C18", tint: "#2a0f10" },
   { color: "#8B5CF6", tint: "#1b1233" },
@@ -8,7 +6,16 @@ export const BOT_COLORS = [
 ];
 
 export const botColor = (i) => BOT_COLORS[i % BOT_COLORS.length];
-export const memPct = (chunks) => Math.min(100, Math.round((chunks / MEMORY_CAP) * 100));
+
+export const memShare = (chunks, bots = [], cap = 0) => {
+  if (!chunks) return 0;
+  const top = Math.max(1, ...bots.map((b) => b.chunks));
+  return Math.max(6, Math.min(100, Math.round((chunks / (cap || top)) * 100)));
+};
+
+export const memLabel = (chunks, cap = 0) =>
+  cap ? chunks + " / " + cap
+      : chunks === 1 ? "1 morceau indexé" : chunks + " morceaux indexés";
 
 // défauts réels de backend/static/widget.js
 export const WIDGET_DEFAULTS = { color: "#CD1C18", position: "bottom-right", title: "Assistant" };

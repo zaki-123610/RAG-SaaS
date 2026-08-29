@@ -1,7 +1,8 @@
-import { botColor, memPct } from "../config";
+import { botColor, memShare } from "../config";
 
-export default function Profile({ user, bots, onDeleteBot }) {
-  const memory = bots.reduce((n, b) => n + b.chunks, 0);
+export default function Profile({ user, bots, usage, onDeleteBot }) {
+  const memory = usage ? usage.used : bots.reduce((n, b) => n + b.chunks, 0);
+  const cap = usage ? usage.limit : 0;
   const average = bots.length ? Math.round(memory / bots.length) : 0;
 
   return (
@@ -28,7 +29,7 @@ export default function Profile({ user, bots, onDeleteBot }) {
 
         <section className="card stat">
           <span className="stat-label">AI Memory totale</span>
-          <span className="stat-num">{memory}<small>u</small></span>
+          <span className="stat-num">{memory}<small>{cap ? "/ " + cap : "u"}</small></span>
         </section>
 
         <section className="card stat">
@@ -49,7 +50,7 @@ export default function Profile({ user, bots, onDeleteBot }) {
                 <span className="mini-dot" style={{ background: c.color }} />
                 <span className="mini-name">{b.name}</span>
                 <span className="gauge-track mini-track">
-                  <span className="gauge-fill" style={{ width: memPct(b.chunks) + "%", background: c.color }} />
+                  <span className="gauge-fill" style={{ width: memShare(b.chunks, bots, cap) + "%", background: c.color }} />
                 </span>
                 <span className="mini-value">{b.chunks} AI Mem.</span>
                 <button type="button" className="btn-remove" onClick={() => onDeleteBot(b.id)}>Supprimer</button>

@@ -56,6 +56,10 @@ export async function listBots() {
   return unwrap(await fetch(API + "/bots", { headers: auth() })); // [{ id, name, chunks }]
 }
 
+export async function getUsage() {
+  return unwrap(await fetch(API + "/usage", { headers: auth() })); // { limit, used }
+}
+
 export const API_ORIGIN = API;
 
 // PATCH /bots/{bot_id}/publish  { is_public, allowed_origins }

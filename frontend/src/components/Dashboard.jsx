@@ -3,7 +3,7 @@ import gsap from "gsap";
 import Sidebar from "./Sidebar";
 import BotCard from "./BotCard";
 
-export default function Dashboard({ bots, view, onView, onOpen, onCreate, onRemove, onLogout, onUnauthorized, profile, publish, docs }) {
+export default function Dashboard({ bots, usage, view, onView, onOpen, onCreate, onRemove, onLogout, onUnauthorized, profile, publish, docs }) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -113,7 +113,7 @@ export default function Dashboard({ bots, view, onView, onOpen, onCreate, onRemo
           ) : (
             <div className="bot-grid" ref={grid}>
               {bots.map((b, i) => (
-                <BotCard key={b.id} bot={b} index={i} onOpen={onOpen} />
+                <BotCard key={b.id} bot={b} bots={bots} cap={usage ? usage.limit : 0} index={i} onOpen={onOpen} />
               ))}
             </div>
           )}

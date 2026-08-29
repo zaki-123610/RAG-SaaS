@@ -21,10 +21,11 @@ document technique en anglais — test cross-lingual.
 | Passage aux embeddings API (Jina, via ChromaDB) | 87.5 % |
 | Migration pgvector + task query/passage|     93.8 %      |
 
+La baisse à 87.5 % est le coût du passage à une API d'embedding, imposé par la contrainte mémoire de Render. Le gain final vient du paramètre task de Jina, qui distingue documents et requêtes.
+
 Chaque changement de chunking ou de modèle est validé par `eval/run_eval.py`
 avant d'être déployé.
 
-La baisse à 87.5 % est le coût du passage à une API d'embedding, imposé par la contrainte mémoire de Render. Le gain final vient du paramètre task de Jina, qui distingue documents et requêtes.
 
 ## Pipeline agentique (Corrective RAG)
 
@@ -71,7 +72,10 @@ niveau du pool de connexions.
 - LLM : Groq (`openai/gpt-oss-120b`), prompt system anti-hallucination
 - Rate limiting (`slowapi`) : `/auth/register` 5/h, `/auth/login` 10/min, `/upload` 10/h, `/query` 30/min, `/public/query` 20/min
 - Widget embarquable : `backend/static/widget.js` servi statiquement, interroge `/public/query` (CORS ouvert, sans JWT)
-
+- Pipeline agentique : LangGraph (`agent/`) — Corrective RAG avec boucle de reformulation
+- Observabilité : Langfuse (tracing des étapes embedding / retrieval / génération)
+- Serveur MCP (`mcp_server/`) exposant le RAG comme outils pour Claude Desktop
+- Tests : pytest + TestClient, CI GitHub Actions sur Postgres jetable
 **Frontend**
 - React 19 + Vite
 - Animations : GSAP
@@ -185,6 +189,7 @@ Auth = header `Authorization: Bearer <jwt>`.
 | POST    | `/upload`                           | Upload un PDF (`multipart`, champs `bot_id` + `file`) et l'indexe | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon), content-type PDF requis, 10 Mo max |
 | POST    | `/query`                            | Pose une question `{bot_id, question}` sur un bot       | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon) |
 | PATCH   | `/bots/{bot_id}/publish`            | Publie/dépublie un bot `{is_public, allowed_origins}`    | Oui  | `bot_id` doit appartenir à l'utilisateur (404 sinon) |
+| GET | /usage | Chunks utilisés et limite du compte | Oui | — |
 
 Aucun endpoint de suppression de compte n'existe encore côté backend — le bouton correspondant dans [Profile.jsx](frontend/src/components/Profile.jsx) est volontairement désactivé.
 

@@ -13,6 +13,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [booting, setBooting] = useState(!!api.getToken());
   const [bots, setBots] = useState([]);
+  const [usage, setUsage] = useState(null);   // { limit, used }
   const [botId, setBotId] = useState("");
   const [screen, setScreen] = useState("landing");   // landing | auth
   const [authMode, setAuthMode] = useState("login");
@@ -24,6 +25,7 @@ export default function App() {
       try {
         setUser(await api.me());
         setBots(await api.listBots());
+        await refreshUsage();
       } catch {
         api.clearToken();
       } finally {
@@ -32,16 +34,26 @@ export default function App() {
     })();
   }, []);
 
+  async function refreshUsage() {
+    try {
+      setUsage(await api.getUsage());
+    } catch {
+      /* echelle relative */
+    }
+  }
+
   async function handleAuth(mode, email, password) {
     await (mode === "login" ? api.login : api.register)(email, password);
     setUser(await api.me());
     setBots(await api.listBots());
+    await refreshUsage();
   }
 
   function logout() {
     api.clearToken();
     setUser(null);
     setBots([]);
+    setUsage(null);
     setBotId("");
     setScreen("landing");
     setView("bots");
@@ -55,6 +67,7 @@ export default function App() {
   async function refreshBots() {
     try {
       setBots(await api.listBots());
+      await refreshUsage();
     } catch {
       /* le prochain rendu réessaiera */
     }
@@ -99,6 +112,7 @@ export default function App() {
   return (
     <Dashboard
       bots={bots}
+      usage={usage}
       view={view}
       onView={setView}
       onOpen={setBotId}
@@ -106,7 +120,7 @@ export default function App() {
       onRemove={removeBot}
       onLogout={logout}
       onUnauthorized={logout}
-      profile={<Profile user={user} bots={bots} onDeleteBot={removeBot} />}
+      profile={<Profile user={user} bots={bots} usage={usage} onDeleteBot={removeBot} />}
       publish={<Publish bots={bots} onUnauthorized={logout} onDocs={() => setView("docs")} onRefresh={refreshBots} />}
       docs={<Docs onPublish={() => setView("publish")} />}
     />
