@@ -60,6 +60,21 @@ Le tracing a montré que le goulot était `register_vector()`, appelé à
 chaque recherche et coûtant un aller-retour réseau complet. Déplacé au
 niveau du pool de connexions.
 
+## Résistance aux hallucinations
+
+Golden set de 16 questions dont la réponse n'existe pas dans le document,
+dont 6 « dans le domaine » (le contexte semble pertinent, la réponse ne l'est pas).
+
+| Configuration | Taux de refus |
+|---------------|---------------|
+| Prompt initial | 93.8 % |
+| + interdiction explicite d'exemples numériques | 100 % * |
+
+\* le seul « échec » restant était une question mal conçue de ma part :
+la réponse figurait bien dans le document.
+
+Un nœud Self-RAG de vérification aurait doublé le coût en appels LLM
+pour corriger un cas qu'une ligne de prompt a réglé. **Non implémenté.**
 ## Stack technique
 
 **Backend**
