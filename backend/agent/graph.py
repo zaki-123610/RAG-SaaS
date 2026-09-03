@@ -30,7 +30,11 @@ builder.add_node("give_up", give_up)
 
 builder.add_edge(START, "retrieve")
 builder.add_edge("retrieve", "grade")
-builder.add_conditional_edges("grade", decider)
+builder.add_conditional_edges(
+    "grade",
+    decider,
+    {"generate": "generate", "rewrite": "rewrite", "give_up": "give_up"},
+)
 builder.add_edge("rewrite", "retrieve")
 builder.add_edge("generate", END)
 builder.add_edge("give_up", END)
