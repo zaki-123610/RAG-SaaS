@@ -17,6 +17,9 @@ SYSTEM_PROMPT = (
     "\"Le document ne contient pas cette information.\" "
     "N'invente aucune formule, aucun exemple, aucune notation absente du contexte. "
     "Reponds dans la langue de la question."
+    "N'invente aucune formule, aucun exemple, aucune notation, aucune valeur "
+    "numerique absente du contexte. Si on te demande un exemple concret qui "
+    "n'est pas dans le document, refuse au lieu d'en fabriquer un. "
 )
 
 groq = Groq(api_key=os.getenv("GROQ_API_KEY"))

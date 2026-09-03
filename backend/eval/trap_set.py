@@ -1,0 +1,18 @@
+TRAP_SET = [
+    {"question": "quelle est la capitale du Japon"},
+    {"question": "combien coute un abonnement mensuel"},
+    {"question": "qui est l auteur de ce document"},
+    {"question": "quelle est la date de publication"},
+    {"question": "comment installer python sur windows"},
+    {"question": "quel est le taux de change du dinar"},
+    {"question": "explique moi la theorie de la relativite"},
+    {"question": "quels sont les horaires d ouverture"},
+    {"question": "donne moi le code source de l algorithme de Kalman"},
+    {"question": "quelle est la temperature aujourd hui a Alger"},
+        {"question": "quelle est la valeur typique du parametre p dans un modele AR"},
+    {"question": "combien de coefficients faut-il pour un ARMA(2,3)"},
+    {"question": "quel logiciel utiliser pour estimer un modele AR"},
+    {"question": "quelle est la complexite algorithmique de Yule-Walker"},
+    {"question": "donne un exemple numerique de calcul de biais"},
+    {"question": "quel est le seuil d efficacite acceptable pour un estimateur"},
+]
