@@ -79,13 +79,14 @@ pour corriger un cas qu'une ligne de prompt a réglé. **Non implémenté.**
 
 **Backend**
 - FastAPI (Python) + Uvicorn
-- Auth : JWT (`python-jose`, HS256, expiration 24h) + hashing `bcrypt`
+- Auth : JWT (`PyJWT`, HS256, expiration 24h) + hashing `bcrypt`, mots de passe de 10 à 72 octets filtrés contre une liste de mots de passe courants, blocage du compte 15 min après 5 échecs de connexion
 - Base de données relationnelle : PostgreSQL (`psycopg`) — tables `users` / `bots` / `documents` / `chunks` / `public_queries`
 - Base vectorielle : pgvector (colonne `embedding vector(1024)` sur `chunks`)
 - Embeddings : Jina AI (`jina-embeddings-v3`)
 - Chunking : LangChain `RecursiveCharacterTextSplitter`, `pypdf` pour l'extraction PDF
 - LLM : Groq (`openai/gpt-oss-120b`), prompt system anti-hallucination
-- Rate limiting (`slowapi`) : `/auth/register` 5/h, `/auth/login` 10/min, `/upload` 10/h, `/query` 30/min, `/public/query` 20/min
+- Rate limiting (`slowapi`) : `/auth/register` 5/h, `/auth/login` 10/min, `POST /bots` 30/h, `/upload` 10/h, `/query` 30/min, `/public/query` 20/min et 200/jour par IP
+- Limites de taille : corps de requête 64 Ko (11 Mo pour `/upload`), questions 1000 caractères, noms de bots 80, 20 bots et 500 morceaux indexés par compte (quota vérifié avant l'embedding)
 - Widget embarquable : `backend/static/widget.js` servi statiquement, interroge `/public/query` (CORS ouvert, sans JWT)
 - Pipeline agentique : LangGraph (`agent/`) — Corrective RAG avec boucle de reformulation
 - Observabilité : Langfuse (tracing des étapes embedding / retrieval / génération)
@@ -153,8 +154,7 @@ RAG-SaaS/
 │   │   └── rag_test.py
 │   │
 │   ├── static/                       # Servi tel quel sur /static
-│   │   ├── widget.js                 # Widget de chat embarquable (bulle + panneau, shadow DOM, appelle /public/query)
-│   │   └── test.html                 # Page de test locale pour charger le widget
+│   │   └── widget.js                 # Widget de chat embarquable (bulle + panneau, shadow DOM, appelle /public/query)
 │   │
 │   ├── data/                         # Documents sources (PDF de test)
 │   └── uploads/                      # Fichiers uploadés (temporaires, supprimés après indexation)
@@ -193,7 +193,7 @@ Auth = header `Authorization: Bearer <jwt>`.
 | Méthode | Route                             | Description                                          | Auth | Vérification |
 |---------|------------------------------------|-------------------------------------------------------|------|--------------|
 | GET     | `/health`                          | Vérifie que l'API répond                               | Non  | — |
-| POST    | `/auth/register`                   | Crée un compte (email + mot de passe ≥ 8 car.)         | Non  | — |
+| POST    | `/auth/register`                   | Crée un compte (email + mot de passe de 10 à 72 octets) | Non  | — |
 | POST    | `/auth/login`                      | Authentifie et retourne un token JWT                   | Non  | — |
 | GET     | `/me`                               | Retourne l'utilisateur courant                         | Oui  | — |
 | GET     | `/bots`                             | Liste les bots de l'utilisateur courant                | Oui  | — |
@@ -201,7 +201,7 @@ Auth = header `Authorization: Bearer <jwt>`.
 | DELETE  | `/bots/{bot_id}`                    | Supprime un bot et son AI Memory (204)                 | Oui  | Le bot doit appartenir à l'utilisateur (404 sinon) |
 | GET     | `/bots/{bot_id}/documents`          | Liste les documents indexés d'un bot                    | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon) |
 | DELETE  | `/bots/{bot_id}/documents/{doc_id}`| Supprime un document et ses chunks (204)                | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon) |
-| POST    | `/upload`                           | Upload un PDF (`multipart`, champs `bot_id` + `file`) et l'indexe | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon), content-type PDF requis, 10 Mo max |
+| POST    | `/upload`                           | Upload un PDF (`multipart`, champs `bot_id` + `file`) et l'indexe | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon), signature PDF vérifiée, 10 Mo et 200 pages max, quota de morceaux vérifié avant l'indexation |
 | POST    | `/query`                            | Pose une question `{bot_id, question}` sur un bot       | Oui  | `bot_id` doit appartenir à l'utilisateur (403 sinon) |
 | PATCH   | `/bots/{bot_id}/publish`            | Publie/dépublie un bot `{is_public, allowed_origins}`    | Oui  | `bot_id` doit appartenir à l'utilisateur (404 sinon) |
 | GET | /usage | Chunks utilisés et limite du compte | Oui | — |
@@ -214,7 +214,9 @@ Monté sous `/public`, avec sa propre politique CORS (`Access-Control-Allow-Orig
 
 | Méthode | Route           | Description | Vérification |
 |---------|-----------------|-------------|---------------|
-| POST    | `/public/query` | Pose une question `{bot_id, question}` sur un bot publié | Bot publié (`is_public`), origine dans `allowed_origins` si non vide (403 sinon), quota `daily_limit` (429 si atteint), question non vide |
+| POST    | `/public/query` | Pose une question `{bot_id, question}` sur un bot publié | Bot publié (`is_public`), origine dans `allowed_origins` si non vide (403 sinon), quota `daily_limit` (429 si atteint), question non vide (1000 caractères max) |
+
+Le contrôle `allowed_origins` empêche l'intégration du widget sur un site non autorisé, mais un client hors navigateur peut envoyer n'importe quel header `Origin` : les vraies protections contre l'abus sont le quota `daily_limit` et le rate limiting par IP.
 
 ## Installation & lancement
 
@@ -228,7 +230,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Nécessite un fichier `backend/.env` (non versionné) avec `DATABASE_URL` (PostgreSQL), `JWT_SECRET`, `JINA_API_KEY` et `GROQ_API_KEY`. Les tables sont créées automatiquement au démarrage (`init_db()` dans [main.py](backend/app/main.py)).
+Nécessite un fichier `backend/.env` (non versionné) : copier [backend/.env.example](backend/.env.example) et remplir `DATABASE_URL` (PostgreSQL), `JWT_SECRET` (32 caractères minimum), `JINA_API_KEY` et `GROQ_API_KEY`. Les tables sont créées automatiquement au démarrage (`init_db()` dans [main.py](backend/app/main.py)).
 
 ### Frontend
 
@@ -252,7 +254,7 @@ Depuis l'écran « Publier bot » du frontend, un utilisateur choisit un bot, un
         data-title="Support"></script>
 ```
 
-À coller avant `</body>` du site cible. Voir [Docs.jsx](frontend/src/components/Docs.jsx) pour le détail des attributs et [backend/static/test.html](backend/static/test.html) pour un exemple de page hôte.
+À coller avant `</body>` du site cible. Voir [Docs.jsx](frontend/src/components/Docs.jsx) pour le détail des attributs. Pour tester en local, il suffit d'une page HTML vide contenant ce snippet.
 
 ## Évaluation du RAG
 
