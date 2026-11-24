@@ -6,6 +6,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
 SEPARATEURS = ["\n\n", "\n", ". ", " ", ""]
+MAX_PAGES = 200
+
+
+class PdfTropLong(ValueError):
+    """Le PDF depasse le nombre de pages autorise."""
 
 
 def nettoyer(texte: str) -> str:
@@ -16,9 +21,11 @@ def nettoyer(texte: str) -> str:
     return texte.strip()
 
 
-def lire_pdf(path: str) -> str:
+def lire_pdf(path: str, max_pages: int = MAX_PAGES) -> str:
     """Extrait le texte de toutes les pages d un PDF."""
     reader = PdfReader(path)
+    if len(reader.pages) > max_pages:
+        raise PdfTropLong(f"Le PDF depasse {max_pages} pages.")
     texte = ""
     for page in reader.pages:
         texte += page.extract_text()

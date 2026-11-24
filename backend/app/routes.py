@@ -1,27 +1,32 @@
-import shutil
+"""Routes privees (JWT).
+
+Les routes sont en `def` et non `async def` : elles appellent du code
+bloquant (Postgres, Jina, Groq, pypdf). FastAPI les execute alors dans un
+pool de threads, au lieu de geler toute l API pendant chaque appel.
+"""
+
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status, Request
-from pydantic import BaseModel
-
-from app.security import get_current_user
-from db.bots import create_bot, list_bots, user_owns_bot
-from rag.generation import answer
-from rag.store import index_document
-
-from rag.store import index_document, list_documents
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from pydantic import BaseModel, Field, field_validator
 
 from app.limiter import limiter
-
-from db.bots import create_bot, delete_bot, list_bots, user_owns_bot
-from rag.store import delete_document, index_document, list_documents
-
-from fastapi import Header
-from db.bots import count_queries_today, get_public_bot, log_query, set_public
-
+from app.schemas import MAX_ORIGINS, BotId, BotName, Question, normaliser_origine
+from app.security import get_current_user
+from db.bots import (
+    MAX_BOTS_PER_USER,
+    count_bots,
+    create_bot,
+    delete_bot,
+    list_bots,
+    set_public,
+    user_owns_bot,
+)
 from db.users import get_usage
-
+from rag.chunking import PdfTropLong, split_pdf
+from rag.generation import answer
+from rag.store import delete_document, index_chunks, list_documents
 
 router = APIRouter()
 
@@ -29,19 +34,31 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 MAX_UPLOAD_MB = 10
 MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
+MAX_FILENAME_CHARS = 200
+
 
 class QueryRequest(BaseModel):
-    bot_id: str
-    question: str
+    bot_id: BotId
+    question: Question
 
 
 class BotRequest(BaseModel):
-    name: str
+    name: BotName
 
 
 class PublishRequest(BaseModel):
     is_public: bool
-    allowed_origins: list[str] = []
+    allowed_origins: list[str] = Field(default_factory=list, max_length=MAX_ORIGINS)
+
+    @field_validator("allowed_origins")
+    @classmethod
+    def valider_origines(cls, origines: list[str]) -> list[str]:
+        propres: list[str] = []
+        for origine in origines:
+            normalisee = normaliser_origine(origine)
+            if normalisee not in propres:
+                propres.append(normalisee)
+        return propres
 
 
 def check_owner(user_id: int, bot_id: str) -> None:
@@ -59,34 +76,40 @@ async def health() -> dict[str, str]:
 
 
 @router.get("/me")
-async def me(user: dict = Depends(get_current_user)) -> dict:
+def me(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
 @router.post("/bots")
-async def new_bot(body: BotRequest, user: dict = Depends(get_current_user)) -> dict:
+@limiter.limit("30/hour")
+def new_bot(request: Request, body: BotRequest, user: dict = Depends(get_current_user)) -> dict:
+    if count_bots(user["id"]) >= MAX_BOTS_PER_USER:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Limite de {MAX_BOTS_PER_USER} chatbots atteinte. Supprimez-en un pour en créer un nouveau.",
+        )
     bot_id = create_bot(user["id"], body.name)
     return {"id": bot_id, "name": body.name, "chunks": 0}
 
 
 @router.get("/bots")
-async def my_bots(user: dict = Depends(get_current_user)) -> list[dict]:
+def my_bots(user: dict = Depends(get_current_user)) -> list[dict]:
     return list_bots(user["id"])
 
 
 @router.post("/upload")
 @limiter.limit("10/hour")
-async def upload(
+def upload(
     request: Request,
-    bot_id: str = Form(...),
+    bot_id: str = Form(..., min_length=1, max_length=32),
     file: UploadFile = File(...),
     user: dict = Depends(get_current_user),
 ) -> dict:
     check_owner(user["id"], bot_id)
 
-
     usage = get_usage(user["id"])
-    if usage["used"] >= usage["limit"]:
+    restant = usage["limit"] - usage["used"]
+    if restant <= 0:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=f"Quota atteint ({usage['used']}/{usage['limit']} morceaux). Supprimez des documents pour continuer.",
@@ -103,18 +126,25 @@ async def upload(
     try:
         with chemin.open("wb") as f:
             while morceau := file.file.read(1024 * 1024):
+                # Le content-type vient du client : on verifie la signature
+                # du fichier (%PDF- dans le premier Ko, comme les lecteurs PDF).
+                if taille == 0 and b"%PDF-" not in morceau[:1024]:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Ce fichier n'est pas un PDF valide.",
+                    )
                 taille += len(morceau)
                 if taille > MAX_UPLOAD_BYTES:
                     raise HTTPException(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                         detail=f"Fichier trop volumineux (max {MAX_UPLOAD_MB} Mo).",
                     )
                 f.write(morceau)
 
         try:
-            n = index_document(str(chemin), bot_id, file.filename or "document.pdf")
-        except HTTPException:
-            raise
+            chunks = split_pdf(str(chemin))
+        except PdfTropLong as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -123,18 +153,37 @@ async def upload(
     finally:
         chemin.unlink(missing_ok=True)
 
-    
+    # Le quota est verifie APRES le decoupage et AVANT l embedding (payant) :
+    # un seul gros PDF ne peut plus depasser la limite.
+    if len(chunks) > restant:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=(
+                f"Ce document donne {len(chunks)} morceaux, il vous en reste {restant} "
+                f"sur {usage['limit']}. Supprimez des documents ou envoyez un fichier plus court."
+            ),
+        )
+
+    filename = (file.filename or "document.pdf")[:MAX_FILENAME_CHARS]
+    try:
+        n = index_chunks(chunks, bot_id, filename)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="L'indexation a echoue, reessayez dans quelques instants.",
+        )
+
     return {"bot_id": bot_id, "chunks": n}
 
 
 @router.get("/bots/{bot_id}/documents")
-async def bot_documents(bot_id: str, user: dict = Depends(get_current_user)) -> list[dict]:
+def bot_documents(bot_id: str, user: dict = Depends(get_current_user)) -> list[dict]:
     check_owner(user["id"], bot_id)
     return list_documents(bot_id)
 
 
 @router.delete("/bots/{bot_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_bot(bot_id: str, user: dict = Depends(get_current_user)):
+def remove_bot(bot_id: str, user: dict = Depends(get_current_user)):
     if not delete_bot(user["id"], bot_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -143,7 +192,7 @@ async def remove_bot(bot_id: str, user: dict = Depends(get_current_user)):
 
 
 @router.delete("/bots/{bot_id}/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def remove_document(
+def remove_document(
     bot_id: str,
     document_id: int,
     user: dict = Depends(get_current_user),
@@ -157,7 +206,7 @@ async def remove_document(
 
 
 @router.patch("/bots/{bot_id}/publish")
-async def publish_bot(
+def publish_bot(
     bot_id: str,
     body: PublishRequest,
     user: dict = Depends(get_current_user),
@@ -171,11 +220,12 @@ async def publish_bot(
 
 
 @router.get("/usage")
-async def usage(user: dict = Depends(get_current_user)) -> dict:
+def usage(user: dict = Depends(get_current_user)) -> dict:
     return get_usage(user["id"])
+
 
 @router.post("/query")
 @limiter.limit("30/minute")
-async def query(request: Request, body: QueryRequest, user: dict = Depends(get_current_user)) -> dict:
+def query(request: Request, body: QueryRequest, user: dict = Depends(get_current_user)) -> dict:
     check_owner(user["id"], body.bot_id)
     return {"answer": answer(body.question, body.bot_id)}

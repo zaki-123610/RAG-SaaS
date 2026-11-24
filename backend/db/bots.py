@@ -2,6 +2,18 @@ import uuid
 
 from db.connection import pool
 
+MAX_BOTS_PER_USER = 20
+
+
+def count_bots(user_id: int) -> int:
+    """Nombre de bots d un user."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) FROM bots WHERE user_id = %s",
+            (user_id,),
+        ).fetchone()
+    return row[0]
+
 
 def create_bot(user_id: int, name: str) -> str:
     """Cree un bot et retourne son id."""

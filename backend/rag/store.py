@@ -11,7 +11,15 @@ BATCH = 50
 
 def index_document(path: str, bot_id: str, filename: str = "document.pdf") -> int:
     """PDF -> chunks -> vecteurs -> Postgres. Retourne le nombre de chunks."""
-    chunks = split_pdf(path)
+    return index_chunks(split_pdf(path), bot_id, filename)
+
+
+def index_chunks(chunks: list[str], bot_id: str, filename: str = "document.pdf") -> int:
+    """Chunks deja decoupes -> vecteurs -> Postgres. Retourne le nombre de chunks.
+
+    Separe de index_document pour que la route d upload puisse verifier le
+    quota entre le decoupage et l appel (payant) a l API d embedding.
+    """
     if not chunks:
         return 0
 

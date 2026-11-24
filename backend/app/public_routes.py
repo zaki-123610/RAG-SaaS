@@ -2,6 +2,7 @@ from fastapi import APIRouter, Header, HTTPException, Request, status
 from pydantic import BaseModel
 
 from app.limiter import limiter
+from app.schemas import BotId, Question
 from db.bots import count_queries_today, get_public_bot, log_query
 from rag.generation import answer
 
@@ -9,13 +10,13 @@ public_router = APIRouter()
 
 
 class PublicQueryRequest(BaseModel):
-    bot_id: str
-    question: str
+    bot_id: BotId
+    question: Question
 
 
 @public_router.post("/query")
-@limiter.limit("20/minute")
-async def public_query(
+@limiter.limit("20/minute;200/day")
+def public_query(
     request: Request,
     body: PublicQueryRequest,
     origin: str | None = Header(default=None),
@@ -27,6 +28,9 @@ async def public_query(
             detail="Chatbot introuvable ou non publie.",
         )
 
+    # Le header Origin protege contre l integration du widget sur un site
+    # non autorise, mais un client hors navigateur (curl...) peut l envoyer
+    # a sa guise : les vraies protections sont le quota et le rate limiting.
     if bot["allowed_origins"] and origin not in bot["allowed_origins"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -39,12 +43,5 @@ async def public_query(
             detail="Quota quotidien atteint pour ce chatbot.",
         )
 
-    question = body.question.strip()
-    if not question:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="La question est vide.",
-        )
-
-    log_query(body.bot_id, question)
-    return {"answer": answer(question, body.bot_id)}
+    log_query(body.bot_id, body.question)
+    return {"answer": answer(body.question, body.bot_id)}

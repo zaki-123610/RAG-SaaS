@@ -179,7 +179,7 @@
     "  </div>",
     '  <div class="thread"></div>',
     '  <div class="bar">',
-    '    <input placeholder="Type a message…" aria-label="Your question" />',
+    '    <input placeholder="Type a message…" aria-label="Your question" maxlength="1000" />',
     '    <button aria-label="Send"><span class="txt">Send</span>' + ICON_SEND + "</button>",
     "  </div>",
     '  <div class="foot">Powered by your assistant</div>',
@@ -257,8 +257,9 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bot_id: BOT_ID, question: q }),
         });
-        const data = await res.json();
-        answer = res.ok ? data.answer : data.detail || "Error";
+        const data = await res.json().catch(() => ({}));
+        const detail = Array.isArray(data.detail) ? data.detail[0] && data.detail[0].msg : data.detail;
+        answer = res.ok ? data.answer : detail || "Error";
       }
     } catch {
       answer = "Connection failed.";

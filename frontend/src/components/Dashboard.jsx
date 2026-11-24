@@ -86,6 +86,7 @@ export default function Dashboard({ bots, usage, view, onView, onOpen, onCreate,
           <div className="inline-form">
             <input
               ref={input}
+              maxLength={80}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nom de votre bot..."

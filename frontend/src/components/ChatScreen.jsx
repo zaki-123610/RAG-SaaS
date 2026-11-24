@@ -200,6 +200,7 @@ async function upload() {
           <div className="composer">
             <input
               placeholder="Posez votre question..."
+              maxLength={1000}
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={(e) => {

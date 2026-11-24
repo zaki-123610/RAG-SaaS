@@ -125,6 +125,7 @@ export default function Publish({ bots, onUnauthorized, onDocs, onRefresh }) {
           </svg>
           <input
             value={url}
+            maxLength={200}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://monsite.com"
             spellCheck="false"
