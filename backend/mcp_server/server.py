@@ -1,16 +1,34 @@
+import logging
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mcp.server.mcpserver import MCPServer
-from db.bots import list_bots
+from db.bots import list_bots, user_owns_bot
 from rag.retrieval import search
 from rag.generation import answer
 
+# En transport stdio, stdout sert au protocole : les logs vont sur stderr.
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+log = logging.getLogger("mcp_server")
+
 mcp = MCPServer("RAG SaaS")
 
-USER_ID = 10
+# Compte dont les bots sont exposes au client MCP. A definir dans
+# backend/.env ou dans la config du client (ex. "env" de Claude Desktop).
+try:
+    USER_ID = int(os.environ["MCP_USER_ID"])
+except (KeyError, ValueError):
+    sys.exit("MCP_USER_ID manquant ou invalide : indique l'id du compte dont les bots sont exposes.")
+
+BOT_INTROUVABLE = "Bot introuvable. Appelle list_my_bots() pour obtenir un bot_id valide."
+
+
+def _bot_autorise(bot_id: str) -> bool:
+    """Le client MCP ne doit voir que les bots du compte configure."""
+    return user_owns_bot(USER_ID, bot_id)
+
 
 @mcp.tool()
 def list_my_bots() -> str:
@@ -35,9 +53,12 @@ def search_documents(bot_id: str, query: str) -> str:
     Appelle list_my_bots() d'abord pour obtenir un bot_id valide.
     """
     try:
+        if not _bot_autorise(bot_id):
+            return BOT_INTROUVABLE
         chunks = search(query, bot_id)
-    except Exception as e:
-        return f"Erreur : {e}. Verifie le bot_id avec list_my_bots()."
+    except Exception:
+        log.exception("search_documents a echoue")
+        return "Erreur pendant la recherche. Reessaie dans un instant."
 
     if not chunks:
         return "Aucun passage trouve. Ce chatbot n'a peut-etre aucun document indexe."
@@ -55,9 +76,12 @@ def ask_bot(bot_id: str, question: str) -> str:
     Appelle list_my_bots() d'abord pour obtenir un bot_id valide.
     """
     try:
+        if not _bot_autorise(bot_id):
+            return BOT_INTROUVABLE
         return answer(question, bot_id)
-    except Exception as e:
-        return f"Erreur : {e}. Verifie le bot_id avec list_my_bots()."
+    except Exception:
+        log.exception("ask_bot a echoue")
+        return "Erreur pendant la generation de la reponse. Reessaie dans un instant."
 
 
 @mcp.prompt(title="Analyser un document")

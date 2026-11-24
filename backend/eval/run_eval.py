@@ -4,7 +4,11 @@ sys.path.append(".")
 from eval.golden_set import GOLDEN_SET
 from rag.retrieval import search
 
-BOT_ID = "236d854fe6ae"
+import os
+
+BOT_ID = os.environ.get("EVAL_BOT_ID") or sys.exit(
+    "Definis EVAL_BOT_ID (dans backend/.env) avec l'id du bot qui contient le PDF d'evaluation."
+)
 
 hits = 0
 echecs = []

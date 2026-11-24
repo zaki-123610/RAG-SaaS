@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 
 from mcp import ClientSession, StdioServerParameters
@@ -21,7 +22,7 @@ async def main():
 
             result = await session.call_tool(
                 "search_documents",
-                {"bot_id": "236d854fe6ae", "query": "modele ARMA"},
+                {"bot_id": os.environ["EVAL_BOT_ID"], "query": "modele ARMA"},
             )
             print("\nsearch_documents ->\n", result.content[0].text[:500])
 

@@ -4,7 +4,11 @@ sys.path.append(".")
 from eval.trap_set import TRAP_SET
 from rag.generation import answer
 
-BOT_ID = "236d854fe6ae"
+import os
+
+BOT_ID = os.environ.get("EVAL_BOT_ID") or sys.exit(
+    "Definis EVAL_BOT_ID (dans backend/.env) avec l'id du bot qui contient le PDF d'evaluation."
+)
 REFUS = ["ne contient pas", "pas trouve", "je ne sais pas", "aucune information"]
 
 refus = 0
