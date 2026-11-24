@@ -63,6 +63,10 @@ export async function getUsage() {
 
 export const API_ORIGIN = API;
 
+// Le widget est servi par le frontend (CDN Vercel, toujours disponible) et
+// non par le backend, qui peut etre endormi : la bulle s'affiche tout de suite.
+export const WIDGET_SRC = window.location.origin + "/widget.js";
+
 // PATCH /bots/{bot_id}/publish  { is_public, allowed_origins }
 export async function publishBot(botId, isPublic, allowedOrigins = []) {
   return unwrap(

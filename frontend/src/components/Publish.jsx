@@ -44,7 +44,8 @@ export default function Publish({ bots, onUnauthorized, onDocs, onRefresh }) {
   const currentStep = done.findIndex((d) => !d);
 
   const snippet = useMemo(() => {
-    const lines = ['<script src="' + api.API_ORIGIN + '/static/widget.js"'];
+    const lines = ['<script src="' + api.WIDGET_SRC + '"'];
+    lines.push('        data-api="' + api.API_ORIGIN + '"');
     lines.push('        data-bot-id="' + (botId || "VOTRE_BOT_ID") + '"');
     if (color.toUpperCase() !== WIDGET_DEFAULTS.color) lines.push('        data-color="' + color + '"');
     if (position !== WIDGET_DEFAULTS.position) lines.push('        data-position="' + position + '"');

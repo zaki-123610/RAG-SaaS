@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { API_ORIGIN } from "../api";
+import { API_ORIGIN, WIDGET_SRC } from "../api";
 import { WIDGET_DEFAULTS } from "../config";
 
 const SNIPPET =
-  '<script src="' + API_ORIGIN + '/static/widget.js"\n        data-bot-id="VOTRE_BOT_ID"><\/script>';
+  '<script src="' + WIDGET_SRC + '"\n        data-api="' + API_ORIGIN + '"\n        data-bot-id="VOTRE_BOT_ID"><\/script>';
 
 const WHERE = [
   ["HTML classique", <>Dans votre <code>index.html</code>, avant <code>&lt;/body&gt;</code>.</>],
@@ -24,7 +24,8 @@ const ATTRS = [
 const ISSUES = [
   ["La bulle n'apparaît pas", <>Vérifiez que le bot est publié et que le snippet se trouve dans <code>&lt;body&gt;</code>, pas dans <code>&lt;head&gt;</code>.</>],
   ["« Ce domaine n'est pas autorisé »", <>Ajoutez l'URL de votre site dans le champ Domaines autorisés de l'écran « Publier bot ». Utilisez le domaine exact que voient vos visiteurs, sans slash final.</>],
-  ["Rien ne se passe au premier message", <>Le serveur peut mettre jusqu'à une minute à démarrer sur le plan gratuit.</>],
+  ["Rien ne se passe au premier message", <>Le serveur peut mettre jusqu'à une minute à démarrer sur le plan gratuit. Le widget le réveille dès le chargement de la page et prévient le visiteur si la réponse tarde.</>],
+  ["La bulle met longtemps à apparaître", <>Vérifiez que <code>src</code> pointe vers <code>{WIDGET_SRC}</code> (et non vers <code>/static/widget.js</code> du serveur API) et que <code>data-api</code> est présent.</>],
 ];
 
 export default function Docs({ onPublish }) {

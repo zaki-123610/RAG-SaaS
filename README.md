@@ -87,7 +87,7 @@ pour corriger un cas qu'une ligne de prompt a réglé. **Non implémenté.**
 - LLM : Groq (`openai/gpt-oss-120b`), prompt system anti-hallucination
 - Rate limiting (`slowapi`) : `/auth/register` 5/h, `/auth/login` 10/min, `POST /bots` 30/h, `/upload` 10/h, `/query` 30/min, `/public/query` 20/min et 200/jour par IP
 - Limites de taille : corps de requête 64 Ko (11 Mo pour `/upload`), questions 1000 caractères, noms de bots 80, 20 bots et 500 morceaux indexés par compte (quota vérifié avant l'embedding)
-- Widget embarquable : `backend/static/widget.js` servi statiquement, interroge `/public/query` (CORS ouvert, sans JWT)
+- Widget embarquable : `widget.js` servi par le frontend (CDN Vercel, la bulle s'affiche même si le backend dort) et par le backend sur `/static/widget.js` ; interroge `/public/query` (CORS ouvert, sans JWT) et réveille le backend dès le chargement de la page
 - Pipeline agentique : LangGraph (`agent/`) — Corrective RAG avec boucle de reformulation
 - Observabilité : Langfuse (tracing des étapes embedding / retrieval / génération)
 - Serveur MCP (`mcp_server/`) exposant le RAG comme outils pour Claude Desktop
@@ -247,7 +247,8 @@ L'app est servie par défaut sur `http://localhost:5173` et communique avec le b
 Depuis l'écran « Publier bot » du frontend, un utilisateur choisit un bot, une origine autorisée et personnalise couleur/position/titre, puis obtient un snippet du type :
 
 ```html
-<script src="http://127.0.0.1:8000/static/widget.js"
+<script src="https://rag-saa-s-theta.vercel.app/widget.js"
+        data-api="https://rag-saas-mdmd.onrender.com"
         data-bot-id="VOTRE_BOT_ID"
         data-color="#2563EB"
         data-position="bottom-left"

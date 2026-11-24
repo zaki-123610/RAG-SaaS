@@ -17,7 +17,11 @@
   if (!script) return console.error("[widget] script not found");
 
   const BOT_ID = script.getAttribute("data-bot-id");
+  // data-api permet d'heberger ce fichier ailleurs que sur le backend (CDN) :
+  // la bulle s'affiche alors meme si le backend est endormi.
   const API = (function () {
+    const explicit = script.getAttribute("data-api");
+    if (explicit) return explicit.replace(/\/+$/, "");
     try { return new URL(script.src).origin; } catch { return ""; }
   })();
   const COLOR = script.getAttribute("data-color") || "#CD1C18";
@@ -28,8 +32,16 @@
   const GREETING = script.getAttribute("data-greeting") || "Hello 👋 Ask your question, I'll answer right away.";
   const STATUS = script.getAttribute("data-status") || "Online now";
   const DEMO = script.getAttribute("data-demo") === "true";
+  const WAKING = "Waking up the assistant… the first answer can take up to a minute.";
 
   if (!BOT_ID && !DEMO) return console.error("[widget] missing data-bot-id");
+
+  // Reveille le backend des le chargement de la page (hebergement gratuit qui
+  // s'endort) : il a ainsi demarre, ou presque, quand le visiteur pose sa
+  // question. no-cors : on n'a pas besoin de lire la reponse.
+  if (!DEMO && API) {
+    fetch(API + "/health", { mode: "no-cors" }).catch(function () {});
+  }
 
   if (!document.getElementById("cw-font")) {
     const l = document.createElement("link");
@@ -246,6 +258,11 @@
     add("q", q);
     const typing = addTyping();
     send.disabled = true;
+    let waking = null;
+    const slow = setTimeout(function () {
+      waking = add("a", WAKING);
+      thread.insertBefore(waking, typing);
+    }, 4000);
     let answer;
     try {
       if (DEMO) {
@@ -264,6 +281,8 @@
     } catch {
       answer = "Connection failed.";
     }
+    clearTimeout(slow);
+    if (waking) waking.remove();
     typing.remove();
     add("a", answer);
     send.disabled = false;
