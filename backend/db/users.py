@@ -2,16 +2,21 @@ from db.connection import pool
 
 
 def create_user(email: str, hashed_password: str) -> int | None:
-    """Insere un user. Retourne son id, ou None si l email existe deja."""
+    """Insere un user. Retourne son id, ou None si l email existe deja.
+
+    La comparaison ignore la casse, y compris pour les comptes crees avant
+    la normalisation des emails en minuscules.
+    """
     with pool.connection() as conn:
         row = conn.execute(
             """
             INSERT INTO users (email, password)
-            VALUES (%s, %s)
-            ON CONFLICT (email) DO NOTHING
+            SELECT %s, %s
+            WHERE NOT EXISTS (SELECT 1 FROM users WHERE lower(email) = lower(%s))
+            ON CONFLICT DO NOTHING
             RETURNING id
             """,
-            (email, hashed_password),
+            (email, hashed_password, email),
         ).fetchone()
     return row[0] if row else None
 
@@ -20,7 +25,12 @@ def get_user_by_email(email: str) -> dict | None:
     """Retourne le user complet (id, email, password) ou None."""
     with pool.connection() as conn:
         row = conn.execute(
-            "SELECT id, email, password FROM users WHERE email = %s",
+            """
+            SELECT id, email, password FROM users
+            WHERE lower(email) = lower(%s)
+            ORDER BY id
+            LIMIT 1
+            """,
             (email,),
         ).fetchone()
     if not row:

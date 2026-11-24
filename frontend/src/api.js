@@ -8,7 +8,8 @@ export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
 async function unwrap(res) {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const err = new Error(body.detail || "HTTP " + res.status);
+    const detail = Array.isArray(body.detail) ? body.detail[0]?.msg : body.detail;
+    const err = new Error(detail || "HTTP " + res.status);
     err.status = res.status;
     throw err;
   }

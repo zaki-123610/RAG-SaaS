@@ -1,5 +1,7 @@
 import pytest
 
+from tests.helpers import PASSWORD
+
 
 @pytest.fixture
 def second_user(client):
@@ -8,7 +10,7 @@ def second_user(client):
     from db.connection import pool
 
     email = f"other_{uuid.uuid4().hex[:8]}@example.com"
-    res = client.post("/auth/register", json={"email": email, "password": "motdepasse123"})
+    res = client.post("/auth/register", json={"email": email, "password": PASSWORD})
     token = res.json()["access_token"]
     yield {"headers": {"Authorization": f"Bearer {token}"}}
     with pool.connection() as conn:

@@ -50,3 +50,17 @@ CREATE INDEX IF NOT EXISTS idx_public_queries_bot_date
     ON public_queries(bot_id, created_at);
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS chunk_limit INTEGER DEFAULT 500;
+
+-- Emails insensibles a la casse : on passe tout en minuscules et on pose un
+-- index unique sur lower(email). Ne fait rien s il existe deja des doublons
+-- qui ne different que par la casse (a regler a la main), pour ne jamais
+-- bloquer le demarrage de l app.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM users GROUP BY lower(email) HAVING COUNT(*) > 1
+    ) THEN
+        UPDATE users SET email = lower(email) WHERE email <> lower(email);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users (lower(email));
+    END IF;
+END $$;

@@ -70,9 +70,10 @@ export default function Login({ onSubmit, mode: initialMode = "login" }) {
             <input
               type="password"
               required
-              minLength={8}
+              minLength={isLogin ? undefined : 10}
+              maxLength={isLogin ? 128 : 72}
               autoComplete={isLogin ? "current-password" : "new-password"}
-              placeholder="8 caractères minimum"
+              placeholder={isLogin ? "Votre mot de passe" : "10 caractères minimum"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />

@@ -8,10 +8,21 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.limiter import limiter
+from app.login_guard import login_guard
 from app.main import app
 from db.connection import pool
 
+from tests.helpers import PASSWORD
+
 limiter.enabled = False
+
+
+@pytest.fixture(autouse=True)
+def reset_login_guard():
+    """Chaque test repart sans compteur d echecs de connexion."""
+    login_guard.reset()
+    yield
+    login_guard.reset()
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +39,7 @@ def email():
 @pytest.fixture
 def user(client, email):
     """Cree un compte et retourne ses infos + headers d auth."""
-    res = client.post("/auth/register", json={"email": email, "password": "motdepasse123"})
+    res = client.post("/auth/register", json={"email": email, "password": PASSWORD})
     token = res.json()["access_token"]
     yield {"email": email, "headers": {"Authorization": f"Bearer {token}"}}
     with pool.connection() as conn:
