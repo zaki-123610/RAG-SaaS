@@ -156,7 +156,7 @@ RAG-SaaS/
 │   ├── static/                       # Servi tel quel sur /static
 │   │   └── widget.js                 # Widget de chat embarquable (bulle + panneau, shadow DOM, appelle /public/query)
 │   │
-│   ├── data/                         # Documents sources (PDF de test)
+│   ├── data/                         # PDF de test (test.pdf) ; le PDF d'évaluation test2.pdf n'est pas versionné
 │   └── uploads/                      # Fichiers uploadés (temporaires, supprimés après indexation)
 │
 ├── frontend/                         # Application React (Vite)
@@ -260,6 +260,8 @@ Depuis l'écran « Publier bot » du frontend, un utilisateur choisit un bot, un
 ## Évaluation du RAG
 
 Le dossier [backend/eval/](backend/eval/) contient un jeu de données de référence (`golden_set.py`) et des scripts pour mesurer la qualité du retrieval (`run_eval.py`, embeddings Jina — ceux réellement utilisés en production) et comparer différentes tailles de chunk/overlap (`sweep.py`). Les fichiers `legacy_*_sentencetransformers.py` utilisent un autre modèle d'embedding et servent de référence historique, pas de mesure de la qualité en production.
+
+Le PDF d'évaluation (`backend/data/test2.pdf`, un support de cours) n'est pas versionné pour des raisons de droits d'auteur. Pour lancer les évaluations, placez votre propre PDF à cet emplacement, indexez-le dans un bot, renseignez son id dans `EVAL_BOT_ID` et adaptez les questions de `golden_set.py` à son contenu.
 
 ## Choix techniques
 
