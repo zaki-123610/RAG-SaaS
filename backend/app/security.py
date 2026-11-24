@@ -30,10 +30,12 @@ ALGORITHM = "HS256"
 TOKEN_HOURS = 24
 BCRYPT_MAX_BYTES = 72
 
-# Hash d un mot de passe bidon. Au login, quand l email n existe pas, on
-# verifie quand meme contre ce hash : le temps de reponse est alors le meme
-# que pour un vrai compte, et ne revele pas si l email est inscrit.
-_DUMMY_HASH = bcrypt.hashpw(b"pas-un-vrai-mot-de-passe", bcrypt.gensalt()).decode("utf-8")
+# Hash bcrypt d une valeur aleatoire jetee (meme cout, 12, que les vrais
+# hashes). Au login, quand l email n existe pas, on verifie quand meme contre
+# ce hash : le temps de reponse est le meme que pour un vrai compte, et ne
+# revele pas si l email est inscrit. Pre-calcule pour ne pas ajouter ~0,4 s
+# a chaque demarrage du serveur.
+_DUMMY_HASH = "$2b$12$irfZJMtmk4UxENpAWMuLlu/oIvJ3EbPlqkfCiUUQiqnpXewHnBque"
 
 
 def hash_password(password: str) -> str:
